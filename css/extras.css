@@ -1,0 +1,230 @@
+/* ============ 🔄 修改：模型选择器位置调整 ============ */
+/* ============ 修复布局与点击问题 ============ */
+
+.composer-wrap {
+  /* 确保容器本身是纵向排列 */
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+  /* 保持原有的定位 */
+	position: fixed;
+	bottom: 22px;
+  /* ⚠️ 保持 pointer-events: none 以便鼠标能穿透空白区域 */
+	pointer-events: none;
+}
+
+/* 修复输入框变小：强制占满容器宽度 */
+.composer {
+	width: 100%;
+	pointer-events: auto;
+ /* 保持输入框可点 */
+}
+
+/* 修复模态框点不了：显式开启点击事件 */
+.model-chip {
+	pointer-events: auto;
+ /* ✅ 关键修复：允许点击 */
+	align-self: flex-start;
+ /* 让按钮靠左对齐，如果喜欢居中可改为 center */
+	background: #fff;
+	z-index: 50;
+ /* 保证层级 */
+	margin: 0 auto;
+}
+
+/* 修复下拉菜单方向：向上弹出 */
+.model-dropdown {
+	top: auto !important;
+	bottom: 100% !important;
+ /* 向上延伸 */
+	margin-bottom: 8px;
+      /* 留出间距 */
+	margin-top: 0 !important;
+	box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+ /* 调整阴影方向 */
+}
+
+/* 修复鼠标悬停断层（透明桥） */
+.model-dropdown::before {
+	top: auto;
+	bottom: -15px;
+ /* 填补按钮和菜单之间的空隙 */
+	height: 15px;
+}
+
+/* ============ ✅ Markdown 渲染样式（仅 assistant 气泡） ============ */
+.msg-bubble.assistant.markdown-body {
+	white-space: normal;
+           /* 覆盖 pre-wrap，给 HTML 正常排版 */
+}
+
+.msg-bubble.assistant.markdown-body p {
+	margin: 0.6em 0;
+}
+
+.msg-bubble.assistant.markdown-body img {
+	max-width: 100%;
+	border-radius: 6px;
+}
+
+.msg-bubble.assistant.markdown-body h1,
+.msg-bubble.assistant.markdown-body h2,
+.msg-bubble.assistant.markdown-body h3 {
+	margin: 0.8em 0 0.4em;
+	line-height: 1.25;
+}
+
+.msg-bubble.assistant.markdown-body ul,
+.msg-bubble.assistant.markdown-body ol {
+	padding-left: 1.2em;
+	margin: 0.6em 0;
+}
+
+.msg-bubble.assistant.markdown-body blockquote {
+	margin: 0.8em 0;
+	padding: 0.2em 0.8em;
+	border-left: 3px solid var(--line);
+	color: var(--muted);
+}
+
+.msg-bubble.assistant.markdown-body code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+	font-size: 0.95em;
+	padding: 0.15em 0.35em;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: #f8fafc;
+}
+
+.msg-bubble.assistant.markdown-body pre {
+	overflow: auto;
+	padding: 12px 14px;
+	border: 1px solid var(--line);
+	border-radius: 14px;
+	background: #f8fafc;
+	color: #0f172a;
+	margin: 0.8em 0;
+	position: relative;
+}
+
+.msg-bubble.assistant.markdown-body pre code {
+	border: none;
+	padding: 0;
+	background: transparent;
+	color: inherit;
+	white-space: pre;
+/* 代码块要保留空格 */
+}
+
+.msg-bubble.assistant.markdown-body pre code.hljs {
+	background: transparent;
+}
+
+.msg-bubble.assistant.markdown-body pre .code-copy-btn {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	opacity: 0;
+	pointer-events: none;
+	z-index: 2;
+}
+
+.msg-bubble.assistant.markdown-body pre:hover .code-copy-btn,
+.msg-bubble.assistant.markdown-body pre:focus-within .code-copy-btn {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+@media (hover: none) {
+	.msg-bubble.assistant.markdown-body pre .code-copy-btn {
+		opacity: 1;
+		pointer-events: auto;
+	}
+}
+
+.msg-bubble.assistant.markdown-body table {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 0.8em 0;
+	font-size: 14px;
+}
+
+.msg-bubble.assistant.markdown-body th,
+.msg-bubble.assistant.markdown-body td {
+	border: 1px solid var(--line);
+	padding: 8px 10px;
+	vertical-align: top;
+}
+
+.msg-bubble.assistant.markdown-body a {
+	color: var(--brand);
+	text-decoration: none;
+}
+
+.msg-bubble.assistant.markdown-body hr {
+	border: 0;
+	border-top: 1px solid var(--line);
+	margin: 16px 0;
+}
+
+.msg-bubble.assistant.markdown-body a:hover {
+	text-decoration: underline;
+}
+
+/* ============ ✅ 附件列表 ============ */
+.attach-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 4px 0;
+}
+
+.attach-list:empty {
+  display: none;
+  padding: 0;
+}
+
+.attach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.attach-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: #f3f4f6;
+}
+
+.attach-name {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attach-remove {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 8px;
+}
+
+.attach-remove:hover {
+  background: #f3f4f6;
+  color: #111827;
+}

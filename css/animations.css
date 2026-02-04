@@ -1,0 +1,135 @@
+/* Animations Keyframes */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slideRight {
+	from {
+		opacity: 0;
+		transform: translateX(-20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideUpFade {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideUpLarge {
+	from {
+		opacity: 0;
+		transform: translateX(-50%) translateY(100px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0);
+	}
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Small screens */
+@media (max-width: 1210px) {
+	:root {
+		--sidebar: 260px;
+	}
+
+	.sidebar {
+		position: fixed;
+		left: 0;
+		top: 0;
+		height: 100%;
+		transform: translateX(-100%);
+		transition: transform var(--duration);
+		box-shadow: none;
+		z-index: 28;
+		animation: none;
+	}
+
+	.sidebar.open {
+		transform: translateX(0);
+	}
+
+	.sidebar-toggle {
+		display: inline-flex;
+	}
+
+	.composer-wrap {
+		left: 50%;
+		transform: translateX(-50%);
+		/* Adjust animation for mobile since left is different */
+		animation-name: slideUpLargeMobile;
+	}
+
+	@keyframes slideUpLargeMobile {
+		from {
+			opacity: 0;
+			transform: translateX(-50%) translateY(100px);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateX(-50%) translateY(0);
+		}
+	}
+
+	.topbar-inner {
+		justify-content: flex-start;
+	}
+
+	.pillbar {
+		max-width: calc(100vw - 40px);
+	}
+}
+
+/* Simple SVG icon styling */
+svg {
+	width: 18px;
+	height: 18px;
+	display: block;
+}
+
+
+
+
+
+

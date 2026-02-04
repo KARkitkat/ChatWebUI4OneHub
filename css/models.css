@@ -1,0 +1,332 @@
+/* 父容器保持相对定位 */
+.model-chip {
+	position: relative;
+	cursor: pointer;
+  /* 确保父容器层级够高 */
+	z-index: 50;
+}
+
+/* 下拉菜单基础样式 */
+.model-dropdown {
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 280px;
+	max-height: 300px;
+	overflow-y: auto;
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+	padding: 6px;
+	margin-top: 10px;
+ /* 视觉上的空隙 */
+  /* 默认隐藏 */
+	visibility: hidden;
+	opacity: 0;
+	transition: all 0.2s ease;
+ /* 增加一点平滑过渡 */
+}
+
+/* --- 核心修复：透明桥 --- */
+/* 这块区域填补了按钮和菜单之间的空白，防止鼠标掉坑 */
+.model-dropdown::before {
+	content: "";
+	position: absolute;
+	top: -15px;
+ /* 向上延伸，覆盖掉 margin-top 的空隙 */
+	left: 0;
+	width: 100%;
+	height: 15px;
+	background: transparent;
+ /* 透明 */
+}
+
+/* 鼠标滑过父容器时显示 */
+.model-chip:hover .model-dropdown {
+	visibility: visible;
+	opacity: 1;
+}
+
+/* 触屏/点击打开 */
+.model-chip.open .model-dropdown {
+	visibility: visible;
+	opacity: 1;
+}
+
+/* 列表项样式 (保持不变) */
+.model-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 12px;
+	border-radius: 6px;
+	font-size: 14px;
+	color: #374151;
+	transition: background 0.2s;
+}
+
+.model-item:hover {
+	background-color: #f3f4f6;
+}
+
+.model-id {
+	font-weight: 500;
+}
+
+.model-owner {
+	font-size: 12px;
+	color: #9ca3af;
+	border: 1px solid #eee;
+	padding: 1px 4px;
+	border-radius: 4px;
+}
+
+/* Pillbar hover panel */
+.model-pop {
+	position: fixed;
+	display: none;
+	min-width: 240px;
+	max-width: min(360px, 92vw);
+	max-height: min(360px, 70vh);
+	flex-direction: column;
+	overflow: hidden;
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 16px;
+	box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+	opacity: 0;
+	transform: translateY(6px) scale(0.98);
+	transition: opacity 0.18s ease, transform 0.18s ease;
+	pointer-events: none;
+	z-index: 60;
+}
+
+.model-pop.show {
+	display: flex;
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	pointer-events: auto;
+}
+
+.model-pop-list {
+	padding: 10px;
+	display: grid;
+	gap: 8px;
+	overflow-y: auto;
+}
+
+.model-pop-item {
+	border: 1px solid transparent;
+	background: #f9fafb;
+	color: #111827;
+	border-radius: 12px;
+	padding: 9px 12px;
+	text-align: left;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.model-pop-item:hover {
+	background: #f3f4f6;
+	transform: translateY(-1px);
+}
+
+.model-pop-item.active {
+	background: linear-gradient(135deg, #0ea5e9, #2563eb);
+	color: #fff;
+}
+
+/* All models modal */
+.model-all-modal {
+	z-index: 60;
+}
+
+.model-all-card {
+	width: min(1120px, 94vw);
+	max-height: min(82vh, 760px);
+	background: #fff;
+	border: 1px solid var(--line);
+	border-radius: 18px;
+	box-shadow: var(--shadow);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.model-all-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--line);
+	background: linear-gradient(180deg, rgba(245, 246, 248, .95), rgba(245, 246, 248, .75));
+}
+
+.model-all-title {
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.model-all-close {
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	border: 1px solid var(--line);
+	background: #fff;
+	color: #111827;
+	display: grid;
+	place-items: center;
+	cursor: pointer;
+	transition: transform var(--duration), box-shadow var(--duration);
+}
+
+.model-all-close:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--shadow2);
+}
+
+.model-all-body {
+	padding: 16px 20px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	overflow: hidden;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.model-all-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	flex: 0 0 auto;
+	z-index: 2;
+}
+
+.model-all-tab {
+	border: 1px solid var(--line);
+	background: #fff;
+	color: #111827;
+	border-radius: 999px;
+	padding: 6px 12px;
+	font-size: 13px;
+	cursor: pointer;
+	transition: all var(--duration);
+}
+
+.model-all-tab:hover {
+	background: #f6f7fb;
+}
+
+.model-all-tab.active {
+	background: #111827;
+	border-color: #111827;
+	color: #fff;
+}
+
+.model-all-tab.model-all-toggle {
+	margin-left: auto;
+	border-style: dashed;
+	color: var(--muted);
+}
+
+.model-all-tab.model-all-toggle:hover {
+	color: #111827;
+	border-color: #cbd5f5;
+}
+
+.model-all-content {
+	overflow: auto;
+	padding-right: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+	flex: 1 1 auto;
+	min-height: 0;
+	z-index: 1;
+}
+
+@media (max-width: 1210px) {
+	.model-all-tabs {
+		max-height: min(100px, 32vh);
+		overflow: auto;
+		padding-right: 4px;
+	}
+}
+
+.model-all-state {
+	color: var(--muted2);
+	font-size: 14px;
+	padding: 12px 4px;
+}
+
+.model-all-state.error {
+	color: #ef4444;
+}
+
+.model-group-title {
+	font-size: 16px;
+	font-weight: 700;
+	margin: 4px 0 10px;
+}
+
+.model-group-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 12px;
+}
+
+.model-card {
+	border: 1px solid #eef2f7;
+	background: #f9fafb;
+	border-radius: 14px;
+	padding: 12px;
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	cursor: pointer;
+	text-align: left;
+	transition: transform var(--duration), box-shadow var(--duration), border-color var(--duration), background var(--duration);
+}
+
+.model-card:hover {
+	transform: translateY(-1px);
+	background: #fff;
+	border-color: #e5e7eb;
+	box-shadow: var(--shadow2);
+}
+
+.model-card-icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	border: 1px solid #e5e7eb;
+	background: #fff;
+	display: grid;
+	place-items: center;
+	flex: 0 0 auto;
+}
+
+.model-card-icon img {
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
+}
+
+.model-card-info {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.model-card-title {
+	font-size: 14px;
+	font-weight: 700;
+	color: #111827;
+	word-break: break-word;
+}
