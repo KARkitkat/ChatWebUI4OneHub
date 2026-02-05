@@ -17,7 +17,7 @@
 
   function formatMoney(n) {
     if (!Number.isFinite(n)) return "--";
-    return `$${n.toFixed(2)}`;
+    return n.toFixed(2);
   }
 
   async function fetchJson(url) {
