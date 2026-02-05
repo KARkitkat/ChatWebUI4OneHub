@@ -47,9 +47,7 @@ const smallScreenQuery = window.matchMedia("(max-width: 1210px)");
 if (apiToken) {
   console.log("获取成功:", apiToken);
 } else {
-  setTimeout(() => {
-    document.write("请先通过正常登录的方式访问。");
-  }, 50);
+  window.top.location.replace("https://topglobai.com");
 }
 
 // Pillbar: mouse wheel horizontal scroll support
