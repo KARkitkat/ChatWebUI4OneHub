@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TOPglobai - 连接全球顶级AI</title>
+    <style>
+        :root {
+            --primary-blue: #4facfe;
+            --primary-purple: #00f2fe;
+            --bg-color: #ffffff;
+            /* 再次放大150%: 104px * 1.5 = 156px */
+            --logo-size: 156px; 
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            height: 100%;
+        }
+
+        /* 背景装饰容器：倾斜 45 度并放大 200% */
+        .bg-decoration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 250vw; 
+            height: 250vh;
+            transform: translate(-50%, -50%) rotate(-45deg) scale(2);
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 50px;
+            pointer-events: none;
+            opacity: 0.18;
+        }
+
+        /* 白色渐变遮罩：右上角到左下角 */
+        .mask-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.4) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* 主内容区域 */
+        .main-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            z-index: 10;
+        }
+
+        .brand-container {
+            text-align: center;
+            margin-bottom: 35px;
+            padding: 0 20px;
+        }
+
+        .brand-name {
+            font-size: clamp(54px, 14vw, 95px);
+            font-weight: 900;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            line-height: 1.1;
+            filter: drop-shadow(0 10px 20px rgba(79, 172, 254, 0.15));
+        }
+
+        .brand-slogan {
+            color: #222;
+            font-size: clamp(1.1rem, 4.5vw, 1.5rem);
+            margin: 22px 0 15px;
+            font-weight: 600;
+        }
+
+        .features-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            color: #666;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .features-bar span:not(:last-child)::after {
+            content: "|";
+            margin-left: 20px;
+            color: #eee;
+        }
+
+        /* 滚动内容样式 */
+        .marquee-row { display: flex; white-space: nowrap; }
+        .marquee-content { display: flex; gap: 40px; padding-right: 40px; }
+        .marquee-content img {
+            width: var(--logo-size);
+            height: var(--logo-size);
+            border-radius: 28px;
+            background: #fff;
+            object-fit: cover;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        /* 速度减慢50%: 80s -> 160s */
+        @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+
+        .row-left .marquee-content { animation: scrollLeft 160s linear infinite; }
+        .row-right .marquee-content { animation: scrollRight 160s linear infinite; }
+
+        /* 输入框区域 */
+        .chat-input-container {
+            margin-top: 35px;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 8px 8px 28px;
+            border-radius: 100px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+            width: 650px;
+            max-width: 92%;
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            backdrop-filter: blur(15px);
+        }
+
+        .chat-input-container input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            color: #000;
+            background: transparent;
+        }
+
+        .btn-chat {
+            background: linear-gradient(135deg, #4facfe 0%, #8e2de2 100%);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            white-space: nowrap;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-chat:hover { transform: scale(1.05) translateY(-2px); }
+
+        @media (max-width: 768px) {
+            :root { --logo-size: 110px; }
+            .bg-decoration { transform: translate(-50%, -50%) rotate(-45deg) scale(1.4); gap: 30px; }
+            .features-bar span:not(:last-child)::after { display: none; }
+            .features-bar { flex-direction: column; gap: 8px; align-items: center; }
+            .chat-input-container { padding: 6px 6px 6px 20px; }
+            .btn-chat { padding: 12px 22px; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-decoration">
+        <div class="marquee-row row-left" id="row1"></div>
+        <div class="marquee-row row-right" id="row2"></div>
+        <div class="marquee-row row-left" id="row3"></div>
+        <div class="marquee-row row-right" id="row4"></div>
+        <div class="marquee-row row-left" id="row5"></div>
+        <div class="marquee-row row-right" id="row6"></div>
+        <div class="marquee-row row-left" id="row7"></div>
+    </div>
+
+    <div class="mask-overlay"></div>
+
+    <div class="main-wrapper">
+        <div class="brand-container">
+            <h1 class="brand-name">TOPglobai</h1>
+            <p class="brand-slogan">全球最全的 AI 汇聚在此，所有顶级 AI 触手可及</p>
+            <div class="features-bar">
+                <span>500+ 顶级模型集成</span>
+                <span>24/7 实时响应</span>
+                <span>超高性价比</span>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" id="chatInput" placeholder="输入你想对话的 AI 模型或问题...">
+            <a href="https://api.topglobai.com/login" target="_top" class="btn-chat">立即对话</a>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = "https://img.topglobai.com/allaiimg/";
+        const logoNumbers = Array.from({length: 53}, (_, i) => i + 1);
+
+        function shuffleArray(array) {
+            const newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        function generateMarqueeHTML() {
+            const shuffled = shuffleArray(logoNumbers);
+            let contentHtml = '<div class="marquee-content">';
+            shuffled.forEach(num => {
+                const fileName = `img-${String(num).padStart(3, '0')}.jpeg`;
+                contentHtml += `<img src="${baseUrl}${fileName}" alt="AI Logo">`;
+            });
+            contentHtml += '</div>';
+            return contentHtml + contentHtml;
+        }
+
+        for(let i=1; i<=7; i++) {
+            const el = document.getElementById('row' + i);
+            if(el) el.innerHTML = generateMarqueeHTML();
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                window.top.location.href = "https://api.topglobai.com/login";
+            }
+        });
+    </script>
+</body>
+</html>

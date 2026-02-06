@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOPglobai - 助你学业工作成功</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0c12; /* 更深的背景 */
+            --accent-blue: #38bdf8;
+            --accent-purple: #818cf8;
+            --text-light: #e2e8f0;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-glow: rgba(56, 189, 248, 0.3);
+            --gradient-text: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 60px;
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 30px;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        .btn-primary {
+            background: var(--gradient-text);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.3s;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+        }
+
+        /* 英雄部分 */
+        .hero-section {
+            text-align: center;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section h1 {
+            font-size: 3.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 25px;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(129, 140, 248, 0.3));
+        }
+
+        .hero-section p {
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 40px;
+            font-weight: 300;
+        }
+
+        .hero-cta {
+            margin-top: 50px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        /* 特性部分 */
+        .features-section {
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .features-section h2 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 60px;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: left;
+            transition: transform 0.3s, box-shadow 0.3s;
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-text);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px var(--border-glow);
+        }
+
+        .feature-card .icon {
+            font-size: 2.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.4));
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+
+        .feature-card p {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        /* CTA 部分 */
+        .cta-section {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            padding: 80px 20px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .cta-section h2 {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 25px;
+            font-weight: 900;
+            line-height: 1.2;
+        }
+
+        .cta-section p {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+
+        /* 底部 */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 50px;
+        }
+
+        /* 背景动画 - 光点 */
+        .bg-dots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-image: radial-gradient(var(--accent-blue) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.05;
+            z-index: -1;
+            animation: move-dots 60s linear infinite;
+        }
+
+        @keyframes move-dots {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: 3000px 3000px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-dots"></div>
+
+    <header class="header container">
+        <div class="logo">TOPglobai</div>
+        <nav class="nav-links">
+            <a href="#features">核心优势</a>
+            <a href="#solutions">解决方案</a>
+            <a href="#contact">联系我们</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="container">
+                <h1>
+                    接入全球最全最顶级的AI<br>
+                    <span style="display: inline-block; margin-top: 10px;">助你学业、工作上的成功！</span>
+                </h1>
+                <p>
+                    无论你是学生、职场人士，还是创业者，TOPglobai 汇聚全球尖端AI模型，为你提供前所未有的智能助力，
+                    加速你的学习、优化你的工作流程，解锁无限可能。
+                </p>
+                <div class="hero-cta">
+                    <a href="#cta" class="btn-primary">立即体验</a>
+                    <a href="#features" class="btn-secondary">了解更多</a>
+                </div>
+            </div>
+        </section>
+        
+        <section id="features" class="features-section">
+            <div class="container">
+                <h2>TOPglobai 如何助你成功？</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="icon">✨</div>
+                        <h3>智能学习加速器</h3>
+                        <p>
+                            从作业辅导、论文写作到知识点答疑，AI帮你高效学习，突破瓶颈，掌握新技能。
+                            定制化学习路径，让进步触手可及。
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🚀</div>
+                        <h3>职场效率倍增器</h3>
+                        <p>
+                            告别繁琐重复，让AI为你撰写报告、策划文案、分析数据。
+                            释放你的时间，专注于创新和战略决策，成为职场佼佼者。
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">💡</div>
+                        <h3>创新灵感催化剂</h3>
+                        <p>
+                            当你在思考新项目、新方案时，AI能提供海量创意、市场分析和可行性评估，
+                            助你打破思维定式，激发无限创新潜力。
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🌍</div>
+                        <h3>全球顶级AI集成</h3>
+                        <p>
+                            我们汇聚了ChatGPT、Claude、Gemini等全球最先进的AI模型，
+                            无需切换平台，一站式体验，满足你所有复杂需求。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cta" class="cta-section">
+            <div class="container">
+                <h2>别再等待，立即开启你的智能成功之路！</h2>
+                <p>
+                    现在就加入 TOPglobai，与全球最强大的AI并肩作战，
+                    在学业和工作中抢占先机，成就非凡！
+                </p>
+                <a href="#" class="btn-primary">免费注册，即刻体验</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            &copy; 2026 TOPglobai. 版权所有.
+        </div>
+    </footer>
+
+</body>
+</html>

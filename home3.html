@@ -202,6 +202,12 @@
             border-radius: 6px;
         }
         .pill.active .dot { background: rgba(255, 255, 255, .22); }
+        .pill .dot.pill-dots {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
         .model-pop {
             position: fixed;
             display: none;
@@ -382,15 +388,16 @@
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         // 模型切换 tab 数据（与主站 index 一致）
+        const IMG_BASE = "https://img.topglobai.com/allaiimg/";
         const MODEL_GROUPS = [
-            { key: "gpt", label: "GPT", icon: "logo/chatgpt.png", models: ["gpt-5.2", "gpt-5.1", "gpt-5", "o3-pro", "o3", "o1-pro", "o1", "gpt-4.1", "gpt-4", "chatgpt-4o-latest", "gpt-3.5-turbo-raw"] },
-            { key: "deepseek", label: "DeepSeek", icon: "logo/deepseek.png", models: ["deepseek-r1", "deepseek-v3.2", "deepseek-v3.1", "deepseek-v3"] },
-            { key: "gemini", label: "Gemini", icon: "logo/gemini.png", models: ["gemini-3-pro", "gemini-3-flash", "gemini-2.5-flash", "gemini-2.0-flash"] },
-            { key: "claude", label: "Claude", icon: "logo/claude.png", models: ["claude-haiku-4.5", "claude-opus-4.5", "claude-opus-4.1", "claude-opus-4", "claude-sonnet-3.5", "claude-haiku-3"] },
-            { key: "kimi", label: "Kimi", icon: "logo/kimi.png", models: ["kimi-k2", "kimi-k2-0905-t", "kimi-k2-instruct", "kimi-k2-t", "kimi-k2-think-t", "kimi-k2-thinking"] },
-            { key: "flux", label: "Flux", icon: "logo/flux.png", models: ["flux-2-flash", "flux-2-max", "flux-2-pro", "flux-2-turbo", "flux-fill", "flux-pro-1.1"] }
+            { key: "gpt", label: "GPT", icon: IMG_BASE + "img-006.jpeg", models: ["gpt-5.2", "gpt-5.1", "gpt-5", "o3-pro", "o3", "o1-pro", "o1", "gpt-4.1", "gpt-4", "chatgpt-4o-latest", "gpt-3.5-turbo-raw"] },
+            { key: "deepseek", label: "DeepSeek", icon: IMG_BASE + "img-012.jpeg", models: ["deepseek-r1", "deepseek-v3.2", "deepseek-v3.1", "deepseek-v3"] },
+            { key: "gemini", label: "Gemini", icon: IMG_BASE + "img-009.jpeg", models: ["gemini-3-pro", "gemini-3-flash", "gemini-2.5-flash", "gemini-2.0-flash"] },
+            { key: "claude", label: "Claude", icon: IMG_BASE + "img-002.jpeg", models: ["claude-haiku-4.5", "claude-opus-4.5", "claude-opus-4.1", "claude-opus-4", "claude-sonnet-3.5", "claude-haiku-3"] },
+            { key: "kimi", label: "Kimi", icon: IMG_BASE + "img-025.jpeg", models: ["kimi-k2", "kimi-k2-0905-t", "kimi-k2-instruct", "kimi-k2-t", "kimi-k2-think-t", "kimi-k2-thinking"] },
+            { key: "flux", label: "Flux", icon: IMG_BASE + "img-042.jpeg", models: ["flux-2-flash", "flux-2-max", "flux-2-pro", "flux-2-turbo", "flux-fill", "flux-pro-1.1"] }
         ];
-        const ALL_PILL = { key: "all", label: "全部", icon: "logo/more.png" };
+        const ALL_PILL = { key: "all", label: "全部", dots: true };
 
         const pillbarEl = document.getElementById("model-pillbar");
         let modelPopEl = null;
@@ -501,7 +508,7 @@
             var allPill = document.createElement("div");
             allPill.className = "pill pill-all";
             allPill.setAttribute("role", "button");
-            allPill.innerHTML = '<span class="dot"><img src="' + ALL_PILL.icon + '" width="18" alt="" /></span>' + ALL_PILL.label;
+            allPill.innerHTML = '<span class="dot pill-dots">⋯</span>' + ALL_PILL.label;
             allPill.addEventListener("click", function(e) { e.preventDefault(); window.location.href = "https://topglobai.com/panel/playground"; });
             pillbarEl.appendChild(allPill);
         }

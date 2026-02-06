@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOPglobai - 连接全球顶级AI</title>
+    <style>
+        :root {
+            --primary-blue: #4facfe;
+            --primary-purple: #8e2de2;
+            --bg-color: #f8faff;
+            --logo-size: 104px; 
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .brand-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .brand-name {
+            font-size: 80px;
+            font-weight: 900;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            letter-spacing: -2px;
+        }
+
+        .brand-slogan {
+            color: #666;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        /* 新增特性样式 */
+        .features-bar {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            color: #999;
+            font-size: 0.95rem;
+        }
+
+        .features-bar span:not(:last-child)::after {
+            content: "|";
+            margin-left: 20px;
+            color: #ddd;
+        }
+
+        .marquee-wrapper {
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .marquee-row {
+            display: flex;
+            white-space: nowrap;
+        }
+
+        .marquee-content {
+            display: flex;
+            gap: 25px;
+            padding-right: 25px;
+        }
+
+        .marquee-content img {
+            width: var(--logo-size);
+            height: var(--logo-size);
+            border-radius: 22px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+            background: #fff;
+            object-fit: cover;
+        }
+
+        @keyframes scrollLeft {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @keyframes scrollRight {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+
+        .row-left .marquee-content { animation: scrollLeft 70s linear infinite; }
+        .row-right .marquee-content { animation: scrollRight 70s linear infinite; }
+
+        .cta-container { margin-top: 40px; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #8e2de2 100%);
+            color: white;
+            padding: 18px 70px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(79, 172, 254, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="brand-container">
+        <h1 class="brand-name">TOPglobai</h1>
+        <p class="brand-slogan">全球最全的 AI 汇聚在此，所有顶级 AI 触手可及</p>
+        <div class="features-bar">
+            <span>500+顶级模型集成</span>
+            <span>24/7实时响应</span>
+            <span>超高性价比</span>
+        </div>
+    </div>
+
+    <div class="marquee-wrapper">
+        <div class="marquee-row row-left" id="row1"></div>
+        <div class="marquee-row row-right" id="row2"></div>
+        <div class="marquee-row row-left" id="row3"></div>
+    </div>
+
+    <div class="cta-container">
+        <a href="#" class="btn-primary">立即体验</a>
+    </div>
+
+    <script>
+        const baseUrl = "https://img.topglobai.com/allaiimg/";
+        const logoNumbers = Array.from({length: 35}, (_, i) => i + 1);
+
+        function shuffleArray(array) {
+            const newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        function generateMarqueeHTML() {
+            const shuffled = shuffleArray(logoNumbers);
+            let contentHtml = '<div class="marquee-content">';
+            
+            shuffled.forEach(num => {
+                const fileName = 'img-' + String(num).padStart(3, '0') + '.jpeg';
+                contentHtml += `<img src="${baseUrl}${fileName}" alt="AI Logo">`;
+            });
+            
+            contentHtml += '</div>';
+            return contentHtml + contentHtml;
+        }
+
+        document.getElementById('row1').innerHTML = generateMarqueeHTML();
+        document.getElementById('row2').innerHTML = generateMarqueeHTML();
+        document.getElementById('row3').innerHTML = generateMarqueeHTML();
+    </script>
+</body>
+</html>
