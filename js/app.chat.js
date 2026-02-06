@@ -234,6 +234,12 @@ function appendMessage(role, text, msgRef) {
     renderLatexIn(content);
     renderCodeHighlight(content);
     secureLinks(content);
+    if (typeof injectVideoPlayers === "function") {
+      injectVideoPlayers(bubble);
+    }
+    if (typeof injectAudioPlayers === "function") {
+      injectAudioPlayers(bubble);
+    }
   } else {
     bubble.dataset.rawText = String(text || "");
     content.textContent = text || "";
@@ -436,6 +442,18 @@ async function generateAssistantResponse(userText, userContentOverride) {
             assistantText = merged;
           }
         }
+        if (typeof mergeGeneratingVideoProgress === "function") {
+          const mergedVideo = mergeGeneratingVideoProgress(assistantText);
+          if (mergedVideo !== assistantText) {
+            assistantText = mergedVideo;
+          }
+        }
+        if (typeof mergeGeneratingMusicProgress === "function") {
+          const mergedMusic = mergeGeneratingMusicProgress(assistantText);
+          if (mergedMusic !== assistantText) {
+            assistantText = mergedMusic;
+          }
+        }
 
         if (!hasAssistantOutput && assistantText.trim() !== "") {
           hasAssistantOutput = true;
@@ -455,6 +473,12 @@ async function generateAssistantResponse(userText, userContentOverride) {
         renderLatexIn(assistantContent);
         renderCodeHighlight(assistantContent);
         secureLinks(assistantContent);
+        if (typeof injectVideoPlayers === "function") {
+          injectVideoPlayers(assistantBubble);
+        }
+        if (typeof injectAudioPlayers === "function") {
+          injectAudioPlayers(assistantBubble);
+        }
         scrollChatToBottom();
 
         assistantMsg.content = assistantText;

@@ -119,6 +119,281 @@ function mergeGeneratingImageProgress(input) {
   return out;
 }
 
+// 合并视频生成进度行（多种格式只保留最后一条）：Generating... (**Ns** elapsed)、Generating video (Ns elapsed)、Generating video (N/Ms elapsed)
+function mergeGeneratingVideoProgress(input) {
+  const text = String(input ?? "");
+  const re = /Generating(?:\.\.\.\s*\(\*\*\d+s\*\* elapsed\)| video \(\d+(?:\/\d+)?s elapsed\))/gi;
+  const matches = [];
+  let m;
+
+  while ((m = re.exec(text)) !== null) {
+    matches.push({ start: m.index, end: re.lastIndex, value: m[0] });
+    if (re.lastIndex === m.index) re.lastIndex++;
+  }
+
+  if (matches.length <= 1) return text;
+
+  let out = "";
+  let cursor = 0;
+  let i = 0;
+
+  while (i < matches.length) {
+    const start = matches[i].start;
+    out += text.slice(cursor, start);
+
+    let j = i;
+    let lastVal = matches[i].value;
+    let seqEnd = matches[i].end;
+
+    while (j + 1 < matches.length) {
+      const gap = text.slice(matches[j].end, matches[j + 1].start);
+      if (/^\s*$/.test(gap)) {
+        j++;
+        lastVal = matches[j].value;
+        seqEnd = matches[j].end;
+        continue;
+      }
+      break;
+    }
+
+    out += lastVal;
+    cursor = seqEnd;
+    i = j + 1;
+  }
+
+  out += text.slice(cursor);
+  return out;
+}
+
+// 合并 "Generating Music (Ns elapsed)" 进度行，只保留最后一条
+function mergeGeneratingMusicProgress(input) {
+  const text = String(input ?? "");
+  const re = /Generating Music \(\d+s elapsed\)/gi;
+  const matches = [];
+  let m;
+
+  while ((m = re.exec(text)) !== null) {
+    matches.push({ start: m.index, end: re.lastIndex, value: m[0] });
+    if (re.lastIndex === m.index) re.lastIndex++;
+  }
+
+  if (matches.length <= 1) return text;
+
+  let out = "";
+  let cursor = 0;
+  let i = 0;
+
+  while (i < matches.length) {
+    const start = matches[i].start;
+    out += text.slice(cursor, start);
+
+    let j = i;
+    let lastVal = matches[i].value;
+    let seqEnd = matches[i].end;
+
+    while (j + 1 < matches.length) {
+      const gap = text.slice(matches[j].end, matches[j + 1].start);
+      if (/^\s*$/.test(gap)) {
+        j++;
+        lastVal = matches[j].value;
+        seqEnd = matches[j].end;
+        continue;
+      }
+      break;
+    }
+
+    out += lastVal;
+    cursor = seqEnd;
+    i = j + 1;
+  }
+
+  out += text.slice(cursor);
+  return out;
+}
+
+// 从文本中提取视频链接（/video/ 路径或常见视频扩展名）
+function extractVideoUrls(text) {
+  const str = String(text ?? "");
+  const urlRe = /https?:\/\/[^\s<>"')\]]+/gi;
+  const urls = [];
+  let m;
+  const seen = new Set();
+
+  while ((m = urlRe.exec(str)) !== null) {
+    let url = m[0].replace(/[.,;:!?)]+$/, "").trim();
+    if (!url) continue;
+    try {
+      const path = new URL(url).pathname.toLowerCase();
+      const isVideo =
+        /\/video\//.test(path) ||
+        /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(path);
+      if (isVideo && !seen.has(url)) {
+        seen.add(url);
+        urls.push(url);
+      }
+    } catch (_) {}
+  }
+  return urls;
+}
+
+// 在气泡内注入视频播放块：预览、下载、倍速
+function injectVideoPlayers(bubble) {
+  if (!bubble || !bubble.classList.contains("assistant")) return;
+  const rawText = bubble.dataset.rawMd || bubble.textContent || "";
+  const urls = extractVideoUrls(rawText);
+  if (urls.length === 0) return;
+
+  const content = getBubbleContent(bubble);
+  if (!content) return;
+
+  content.querySelectorAll(".msg-video-wrap").forEach((el) => el.remove());
+
+  const speeds = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+
+  urls.forEach((url) => {
+    const wrap = document.createElement("div");
+    wrap.className = "msg-video-wrap";
+
+    const video = document.createElement("video");
+    video.className = "msg-video-player";
+    video.src = url;
+    video.controls = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+
+    const toolbar = document.createElement("div");
+    toolbar.className = "msg-video-toolbar";
+
+    const speedLabel = document.createElement("span");
+    speedLabel.className = "msg-video-speed-label";
+    speedLabel.textContent = "倍速:";
+
+    const speedSelect = document.createElement("select");
+    speedSelect.className = "msg-video-speed";
+    speedSelect.setAttribute("aria-label", "播放倍速");
+    speeds.forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = String(s);
+      opt.textContent = s === 1 ? "1x" : s + "x";
+      if (s === 1) opt.selected = true;
+      speedSelect.appendChild(opt);
+    });
+    speedSelect.addEventListener("change", () => {
+      video.playbackRate = Number(speedSelect.value);
+    });
+
+    const downloadBtn = document.createElement("a");
+    downloadBtn.className = "msg-video-download";
+    downloadBtn.href = url;
+    downloadBtn.download = "";
+    downloadBtn.target = "_blank";
+    downloadBtn.rel = "noopener noreferrer";
+    downloadBtn.setAttribute("aria-label", "下载视频");
+    const downloadText = document.createElement("span");
+    downloadText.className = "msg-video-download-text";
+    downloadText.textContent = "下载";
+    downloadBtn.appendChild(downloadText);
+
+    toolbar.appendChild(speedLabel);
+    toolbar.appendChild(speedSelect);
+    toolbar.appendChild(downloadBtn);
+    wrap.appendChild(video);
+    wrap.appendChild(toolbar);
+    content.appendChild(wrap);
+  });
+}
+
+// 从文本中提取音频链接（/audio/ 路径或常见音频扩展名）
+function extractAudioUrls(text) {
+  const str = String(text ?? "");
+  const urlRe = /https?:\/\/[^\s<>"')\]]+/gi;
+  const urls = [];
+  let m;
+  const seen = new Set();
+
+  while ((m = urlRe.exec(str)) !== null) {
+    let url = m[0].replace(/[.,;:!?)]+$/, "").trim();
+    if (!url) continue;
+    try {
+      const path = new URL(url).pathname.toLowerCase();
+      const isAudio =
+        /\/audio\//.test(path) ||
+        /\.(mp3|wav|ogg|m4a|aac|flac|webm)(\?|$)/i.test(path);
+      if (isAudio && !seen.has(url)) {
+        seen.add(url);
+        urls.push(url);
+      }
+    } catch (_) {}
+  }
+  return urls;
+}
+
+// 在气泡内注入音频播放块：预览、下载、倍速
+function injectAudioPlayers(bubble) {
+  if (!bubble || !bubble.classList.contains("assistant")) return;
+  const rawText = bubble.dataset.rawMd || bubble.textContent || "";
+  const urls = extractAudioUrls(rawText);
+  if (urls.length === 0) return;
+
+  const content = getBubbleContent(bubble);
+  if (!content) return;
+
+  content.querySelectorAll(".msg-audio-wrap").forEach((el) => el.remove());
+
+  const speeds = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+
+  urls.forEach((url) => {
+    const wrap = document.createElement("div");
+    wrap.className = "msg-audio-wrap";
+
+    const audio = document.createElement("audio");
+    audio.className = "msg-audio-player";
+    audio.src = url;
+    audio.controls = true;
+    audio.preload = "metadata";
+
+    const toolbar = document.createElement("div");
+    toolbar.className = "msg-audio-toolbar";
+
+    const speedLabel = document.createElement("span");
+    speedLabel.className = "msg-audio-speed-label";
+    speedLabel.textContent = "倍速:";
+
+    const speedSelect = document.createElement("select");
+    speedSelect.className = "msg-audio-speed";
+    speedSelect.setAttribute("aria-label", "播放倍速");
+    speeds.forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = String(s);
+      opt.textContent = s === 1 ? "1x" : s + "x";
+      if (s === 1) opt.selected = true;
+      speedSelect.appendChild(opt);
+    });
+    speedSelect.addEventListener("change", () => {
+      audio.playbackRate = Number(speedSelect.value);
+    });
+
+    const downloadBtn = document.createElement("a");
+    downloadBtn.className = "msg-audio-download";
+    downloadBtn.href = url;
+    downloadBtn.download = "";
+    downloadBtn.target = "_blank";
+    downloadBtn.rel = "noopener noreferrer";
+    downloadBtn.setAttribute("aria-label", "下载音频");
+    const downloadText = document.createElement("span");
+    downloadText.className = "msg-audio-download-text";
+    downloadText.textContent = "下载";
+    downloadBtn.appendChild(downloadText);
+
+    toolbar.appendChild(speedLabel);
+    toolbar.appendChild(speedSelect);
+    toolbar.appendChild(downloadBtn);
+    wrap.appendChild(audio);
+    wrap.appendChild(toolbar);
+    content.appendChild(wrap);
+  });
+}
+
 // 给渲染出的链接补上安全属性（可选但推荐）
 function secureLinks(container) {
   container.querySelectorAll("a").forEach((a) => {
