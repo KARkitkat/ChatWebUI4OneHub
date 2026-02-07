@@ -22,6 +22,17 @@
   </head>
 
   <body>
+    <!-- 被嵌套时显示的提示层 -->
+    <div id="nested-overlay" class="nested-overlay" aria-hidden="true" hidden>
+      <div class="nested-overlay-card">
+        <p class="nested-overlay-msg">已经打开对话页。</p>
+        <div class="nested-overlay-actions">
+          <button type="button" class="btn primary" id="nestedBtnPanel">返回到用户面板</button>
+          <button type="button" class="btn ghost" id="nestedBtnReopen">再次打开</button>
+        </div>
+      </div>
+    </div>
+
     <button class="sidebar-toggle" type="button" aria-label="打开侧栏">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M3 6h18" />

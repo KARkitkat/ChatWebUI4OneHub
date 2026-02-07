@@ -1,3 +1,41 @@
+(function () {
+  function isInIframe() {
+    try {
+      return window.self !== window.top;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  if (isInIframe()) {
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("key")) {
+      localStorage.setItem("apiToken", urlParams.get("key"));
+    }
+    var reopenUrl = window.location.origin + window.location.pathname;
+    var cachedKey = localStorage.getItem("apiToken");
+    if (cachedKey) reopenUrl += "?key=" + encodeURIComponent(cachedKey);
+    try {
+      window.top.location.href = reopenUrl;
+    } catch (e) {}
+    setTimeout(function () {
+      if (!isInIframe()) return;
+      var overlay = document.getElementById("nested-overlay");
+      if (overlay) {
+        overlay.hidden = false;
+        overlay.setAttribute("aria-hidden", "false");
+      }
+      document.getElementById("nestedBtnPanel")?.addEventListener("click", function () {
+        window.top.location.href = "https://topglobai.com/panel";
+      });
+      document.getElementById("nestedBtnReopen")?.addEventListener("click", function () {
+        window.top.location.href = reopenUrl;
+      });
+    }, 400);
+    return;
+  }
+})();
+
 // 1. 获取当前 URL 的参数
 const urlParams = new URLSearchParams(window.location.search);
 // 2. 检查是否存在指定 key

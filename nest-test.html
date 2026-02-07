@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>嵌套测试 - 对话页 iframe 检测</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #111827;
+      padding: 16px;
+    }
+    h1 { font-size: 18px; margin: 0 0 8px 0; }
+    .tip {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 12px;
+    }
+    .bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .bar label { font-size: 13px; }
+    .bar input[type="text"] {
+      width: 200px;
+      padding: 6px 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .bar button {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .bar button.primary {
+      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      border: none;
+      color: #fff;
+    }
+    .frame-wrap {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      height: calc(100vh - 140px);
+      min-height: 400px;
+    }
+    .frame-wrap iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>嵌套测试页</h1>
+  <p class="tip">本页用 iframe 嵌入对话页，用于验证「已经打开对话页」提示及「返回到用户面板 / 再次打开」按钮。</p>
+  <div class="bar">
+    <label>key 参数（可选，测试缓存）：</label>
+    <input type="text" id="keyInput" placeholder="例如：test-key-123" />
+    <button type="button" id="btnReload">重新加载 iframe</button>
+    <button type="button" class="primary" id="btnNewTab">在新标签页打开对话页</button>
+  </div>
+  <div class="frame-wrap">
+    <iframe id="chatFrame" src="index.html" title="对话页"></iframe>
+  </div>
+
+  <script>
+    var frame = document.getElementById("chatFrame");
+    var keyInput = document.getElementById("keyInput");
+
+    function getFrameSrc() {
+      var base = "index.html";
+      var key = (keyInput && keyInput.value) ? keyInput.value.trim() : "";
+      return key ? base + "?key=" + encodeURIComponent(key) : base;
+    }
+
+    document.getElementById("btnReload").addEventListener("click", function () {
+      frame.src = getFrameSrc();
+    });
+
+    document.getElementById("btnNewTab").addEventListener("click", function () {
+      window.open(getFrameSrc(), "_blank");
+    });
+  </script>
+</body>
+</html>
