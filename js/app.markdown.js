@@ -174,11 +174,18 @@ function isOnlyGeneratingProgress(text) {
   let rest = t
     .replace(/Generating\.{1,3}\s*\(\d+s\)/gi, "")
     .replace(/Generating(?:\.\.\.\s*\(\*\*\d+s\*\* elapsed\)| video \(\d+(?:\/\d+)?s elapsed\))/gi, "")
+    .replace(/Generating Audio \(\d+s elapsed\)/gi, "")
+    .replace(/Generated Audio!\s*/gi, "")
+    .replace(/\[Single Speaker\] Synthesizing\s*\.{0,3}\s*\(\d+s elapsed\)/gi, "")
     .trim();
   rest = rest.replace(/\s*Generating\.{0,3}\s*$/i, "").trim();
+  rest = rest.replace(/\s*Generating Audio\s*$/i, "").trim();
+  rest = rest.replace(/\s*\[Single Speaker\] Synthesizing\.{0,3}\s*$/i, "").trim();
   if (rest === "") return true;
   if (/^Generating\.{0,3}$/i.test(rest)) return true;
   if (/^Generat/i.test(rest) && rest.length < 12) return true;
+  if (/^Generating Audio\s*$/i.test(rest)) return true;
+  if (/^\[Single Speaker\] Synthesiz/i.test(rest) && rest.length < 35) return true;
   return false;
 }
 
@@ -207,6 +214,98 @@ function mergeGeneratingMusicProgress(input) {
     let j = i;
     let lastVal = matches[i].value;
     let seqEnd = matches[i].end;
+
+    while (j + 1 < matches.length) {
+      const gap = text.slice(matches[j].end, matches[j + 1].start);
+      if (/^\s*$/.test(gap)) {
+        j++;
+        lastVal = matches[j].value;
+        seqEnd = matches[j].end;
+        continue;
+      }
+      break;
+    }
+
+    out += lastVal;
+    cursor = seqEnd;
+    i = j + 1;
+  }
+
+  out += text.slice(cursor);
+  return out;
+}
+
+// 合并 "Generating Audio (Ns elapsed)" 进度行，只保留最后一条
+function mergeGeneratingAudioProgress(input) {
+  const text = String(input ?? "");
+  const re = /Generating Audio \(\d+s elapsed\)/gi;
+  const matches = [];
+  let m;
+
+  while ((m = re.exec(text)) !== null) {
+    matches.push({ start: m.index, end: re.lastIndex, value: m[0] });
+    if (re.lastIndex === m.index) re.lastIndex++;
+  }
+
+  if (matches.length <= 1) return text;
+
+  let out = "";
+  let cursor = 0;
+  let i = 0;
+
+  while (i < matches.length) {
+    const start = matches[i].start;
+    out += text.slice(cursor, start);
+
+    let j = i;
+    let lastVal = matches[j].value;
+    let seqEnd = matches[j].end;
+
+    while (j + 1 < matches.length) {
+      const gap = text.slice(matches[j].end, matches[j + 1].start);
+      if (/^\s*$/.test(gap)) {
+        j++;
+        lastVal = matches[j].value;
+        seqEnd = matches[j].end;
+        continue;
+      }
+      break;
+    }
+
+    out += lastVal;
+    cursor = seqEnd;
+    i = j + 1;
+  }
+
+  out += text.slice(cursor);
+  return out;
+}
+
+// 合并 "[Single Speaker] Synthesizing .{0,3} (Ns elapsed)" 进度行，只保留最后一条
+function mergeGeneratingSynthesizeProgress(input) {
+  const text = String(input ?? "");
+  const re = /\[Single Speaker\] Synthesizing\s*\.{0,3}\s*\(\d+s elapsed\)/gi;
+  const matches = [];
+  let m;
+
+  while ((m = re.exec(text)) !== null) {
+    matches.push({ start: m.index, end: re.lastIndex, value: m[0] });
+    if (re.lastIndex === m.index) re.lastIndex++;
+  }
+
+  if (matches.length <= 1) return text;
+
+  let out = "";
+  let cursor = 0;
+  let i = 0;
+
+  while (i < matches.length) {
+    const start = matches[i].start;
+    out += text.slice(cursor, start);
+
+    let j = i;
+    let lastVal = matches[j].value;
+    let seqEnd = matches[j].end;
 
     while (j + 1 < matches.length) {
       const gap = text.slice(matches[j].end, matches[j + 1].start);

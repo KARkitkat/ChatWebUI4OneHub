@@ -71,23 +71,29 @@ const promptTranslateBtn = document.querySelector('.side-item[data-prompt="trans
 const promptOptimizeBtn = document.querySelector('.side-item[data-prompt="optimize"]');
 const promptDrawBtn = document.querySelector('.side-item[data-prompt="draw"]');
 const promptVideoBtn = document.querySelector('.side-item[data-prompt="video"]');
+const promptAudioBtn = document.querySelector('.side-item[data-prompt="audio"]');
 
 const PROMPT_TEXTS = {
   translate: "请将以下文本翻译成英文：\n",
   optimize: "请优化以下文本，使其更清晰、更流畅：\n",
   draw: "创建一幅图片：",
   video: "创作一段视频：",
+  audio: "", // 创作音频不添加前缀文字
 };
 
 const DRAW_AUTO_MODEL_ID = "nano-banana";
-const VIDEO_AUTO_MODEL_ID = "veo-3.1";
+const VIDEO_AUTO_MODEL_ID = "sora-2";
+const AUDIO_AUTO_MODEL_ID = "elevenlabs-v3";
 const DRAW_MODEL_STORAGE_KEY =
   typeof MODEL_STORAGE_KEY === "string" ? MODEL_STORAGE_KEY : "selected_model_v1";
 const VIDEO_MODEL_STORAGE_KEY = "selected_video_model_v1";
+const AUDIO_MODEL_STORAGE_KEY = "selected_audio_model_v1";
 let drawAutoModelEnabled = false;
 let drawAutoModelRestore = "";
 let videoAutoModelEnabled = false;
 let videoAutoModelRestore = "";
+let audioAutoModelEnabled = false;
+let audioAutoModelRestore = "";
 
 function getCurrentSelectedModelValue() {
   const el = document.getElementById("selected-model");
@@ -202,6 +208,59 @@ function disableVideoAutoModel() {
     videoAutoApplySelectedModel(target, { persist: false });
   }
   videoAutoModelRestore = "";
+}
+
+function audioAutoGetSelectedModelValue() {
+  return getCurrentSelectedModelValue();
+}
+
+function audioAutoApplySelectedModel(modelId, options = {}) {
+  const next = String(modelId ?? "").trim();
+  if (!next) return;
+  if (typeof setSelectedModel === "function") {
+    setSelectedModel(next, options);
+    return;
+  }
+  const modelEl = document.getElementById("selected-model");
+  if (modelEl) {
+    modelEl.dataset.modelId = next;
+    modelEl.textContent = next;
+  }
+  const persist = options?.persist !== false;
+  if (persist) {
+    try {
+      localStorage.setItem(AUDIO_MODEL_STORAGE_KEY, next);
+    } catch (_) {}
+  }
+  document.dispatchEvent(new CustomEvent("model:selected", { detail: { modelId: next } }));
+}
+
+function enableAudioAutoModel() {
+  if (!audioAutoModelEnabled) {
+    audioAutoModelRestore = audioAutoGetSelectedModelValue();
+  }
+  audioAutoModelEnabled = true;
+  if (
+    drawAutoNormalizeModelId(audioAutoGetSelectedModelValue()) !==
+    drawAutoNormalizeModelId(AUDIO_AUTO_MODEL_ID)
+  ) {
+    audioAutoApplySelectedModel(AUDIO_AUTO_MODEL_ID, { persist: false });
+  }
+}
+
+function disableAudioAutoModel() {
+  if (!audioAutoModelEnabled) return;
+  audioAutoModelEnabled = false;
+  const stored = localStorage.getItem(AUDIO_MODEL_STORAGE_KEY) || "";
+  const target = stored || audioAutoModelRestore;
+  if (
+    target &&
+    drawAutoNormalizeModelId(target) !==
+      drawAutoNormalizeModelId(audioAutoGetSelectedModelValue())
+  ) {
+    audioAutoApplySelectedModel(target, { persist: false });
+  }
+  audioAutoModelRestore = "";
 }
 
 function escapeHtml(s) {
@@ -538,6 +597,9 @@ function syncSideSelection() {
     if (activePromptKey === "video") {
       promptVideoBtn?.classList.add("is-active");
     }
+    if (activePromptKey === "audio") {
+      promptAudioBtn?.classList.add("is-active");
+    }
   }
 
   if (activeSideKind === "session" && sessionsGroupEl) {
@@ -560,6 +622,7 @@ function setActiveSideKind(kind, options = {}) {
   if (activeSideKind !== "prompt" && !keepModel) {
     disableDrawAutoModel();
     disableVideoAutoModel();
+    disableAudioAutoModel();
   }
   syncSideSelection();
   syncTopbarVisibility();
@@ -588,6 +651,9 @@ function clearPromptSelection(options = {}) {
   }
   if (videoAutoModelEnabled && !keepModel) {
     disableVideoAutoModel();
+  }
+  if (audioAutoModelEnabled && !keepModel) {
+    disableAudioAutoModel();
   }
   if (!activePromptKey) return;
   ta.value = stripPromptPrefix(ta.value || "", activePromptKey);
@@ -680,18 +746,18 @@ async function deleteSelectedSessions() {
 
 function activatePrompt(key) {
   const prompt = PROMPT_TEXTS[key];
-  if (!prompt) return;
+  if (prompt === undefined || (prompt === "" && key !== "audio")) return;
 
-  let content = ta.value || "";
-  if (activePromptKey && activePromptKey !== key) {
-    content = stripPromptPrefix(content, activePromptKey);
+  if (prompt) {
+    let content = ta.value || "";
+    if (activePromptKey && activePromptKey !== key) {
+      content = stripPromptPrefix(content, activePromptKey);
+    }
+    if (!content.startsWith(prompt)) {
+      content = content ? `${prompt}${content}` : prompt;
+    }
+    ta.value = content;
   }
-
-  if (!content.startsWith(prompt)) {
-    content = content ? `${prompt}${content}` : prompt;
-  }
-
-  ta.value = content;
   activePromptKey = key;
   setActiveSideKind("prompt");
   if (key === "draw") {
@@ -700,9 +766,15 @@ function activatePrompt(key) {
   } else if (key === "video") {
     enableVideoAutoModel();
     disableDrawAutoModel();
+    disableAudioAutoModel();
+  } else if (key === "audio") {
+    enableAudioAutoModel();
+    disableDrawAutoModel();
+    disableVideoAutoModel();
   } else {
     disableDrawAutoModel();
     disableVideoAutoModel();
+    disableAudioAutoModel();
     applySessionModel("gpt-4");
   }
   syncHeight();
@@ -732,8 +804,9 @@ async function saveCurrentChatToServer() {
     if (activeSideKind === "prompt" && activePromptKey) {
       const keepDrawModel = activePromptKey === "draw";
       const keepVideoModel = activePromptKey === "video";
-      clearPromptSelection({ keepModel: keepDrawModel || keepVideoModel });
-      setActiveSideKind("session", { keepModel: keepDrawModel || keepVideoModel });
+      const keepAudioModel = activePromptKey === "audio";
+      clearPromptSelection({ keepModel: keepDrawModel || keepVideoModel || keepAudioModel });
+      setActiveSideKind("session", { keepModel: keepDrawModel || keepVideoModel || keepAudioModel });
     }
     await refreshSessionsList();
   }
@@ -1142,6 +1215,16 @@ promptVideoBtn?.addEventListener("click", (ev) => {
     startNewChat();
   }
   activatePrompt("video");
+  scheduleSidebarClose();
+});
+
+promptAudioBtn?.addEventListener("click", (ev) => {
+  ev.stopPropagation();
+  if (window.isGenerating) return;
+  if (activeSideKind === "session") {
+    startNewChat();
+  }
+  activatePrompt("audio");
   scheduleSidebarClose();
 });
 

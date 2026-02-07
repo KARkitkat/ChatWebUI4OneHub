@@ -117,74 +117,37 @@ function toVideoModelDisplayName(modelId) {
   }).join("-");
 }
 
+// 视频模型：与产品列表一致，API 小写
 const MODEL_GROUPS_VIDEO = [
-  {
-    key: "sora",
-    label: "Sora",
-    icon: "logo/more.png",
-    models: ["sora-2-pro", "sora-2", "sora"],
-  },
-  {
-    key: "veo",
-    label: "Veo",
-    icon: "logo/more.png",
-    models: [
-      "veo-3.1", "veo-3", "veo-3.1-fast", "veo-3-fast", "veo-3-vfast",
-      "veo-2", "veo-2-video", "veo-v3.1", "veo-v3.1-fast",
-    ],
-  },
-  {
-    key: "wan",
-    label: "Wan",
-    icon: "logo/more.png",
-    models: ["wan-2.6", "wan-2.5", "wan-2.1", "wan-animate", "wan-2.2"],
-  },
-  {
-    key: "hailuo",
-    label: "Hailuo",
-    icon: "logo/more.png",
-    models: [
-      "hailuo-director-01", "hailuo-02", "hailuo-02-standard",
-      "hailuo-02-pro", "hailuo-live", "hailuo-ai",
-    ],
-  },
-  {
-    key: "pixverse",
-    label: "Pixverse",
-    icon: "logo/more.png",
-    models: ["pixverse-v5", "pixverse-v4.5"],
-  },
-  {
-    key: "seedance",
-    label: "Seedance",
-    icon: "logo/more.png",
-    models: ["seedance-1.0-pro", "seedance-1.0-lite", "seedance-1.0-fast"],
-  },
-  {
-    key: "ltx",
-    label: "LTX",
-    icon: "logo/more.png",
-    models: ["ltx-2-fast", "ltx-2-pro", "ltx-2-audio"],
-  },
-  {
-    key: "vidu",
-    label: "Vidu",
-    icon: "logo/more.png",
-    models: ["vidu", "vidu-q1"],
-  },
-  {
-    key: "other",
-    label: "其他",
-    icon: "logo/more.png",
-    models: [
-      "runwaygen-4.5", "runway-gen-4-turbo", "runway",
-      "kling-2.6-pro", "kling-2.5-turbo-pro", "kling-omni", "kling-2.5-turbo-std",
-      "kling-2.1-master", "kling-2.1-pro", "kling-2.1-std", "kling-2.0-master",
-      "kling-1.6-pro", "kling-1.5-pro", "kling-pro-effects",
-      "grok-imagine-video", "hunyuan-video-1.5", "svi-2.0-pro",
-      "amazon-nova-reel-1.1", "kling-avatar-pro", "omnihuman", "ray2", "mochi-preview",
-    ],
-  },
+  { key: "veo", label: "Veo", icon: "logo/more.png", models: ["veo-3.1", "veo-3", "veo-3.1-fast", "veo-3-fast", "veo-3-vfast", "veo-2", "veo-2-video", "veo-v3.1", "veo-v3.1-fast"] },
+  { key: "sora", label: "Sora", icon: "logo/more.png", models: ["sora-2-pro", "sora-2", "sora"] },
+  { key: "runway", label: "Runway", icon: "logo/more.png", models: ["runwaygen-4.5", "runway-gen-4-turbo", "runway"] },
+  { key: "kling", label: "Kling", icon: "logo/more.png", models: ["kling-2.6-pro", "kling-2.5-turbo-pro", "kling-omni", "kling-2.5-turbo-std", "kling-2.1-master", "kling-2.1-pro", "kling-2.1-std", "kling-2.0-master", "kling-1.6-pro", "kling-1.5-pro", "kling-pro-effects"] },
+  { key: "wan", label: "Wan", icon: "logo/more.png", models: ["wan-2.6", "wan-2.5", "wan-2.1", "wan-animate", "wan-2.2"] },
+  { key: "hailuo", label: "Hailuo", icon: "logo/more.png", models: ["hailuo-director-01", "hailuo-02", "hailuo-02-standard", "hailuo-02-pro", "hailuo-live", "hailuo-ai"] },
+  { key: "pixverse", label: "Pixverse", icon: "logo/more.png", models: ["pixverse-v5", "pixverse-v4.5"] },
+  { key: "seedance", label: "Seedance", icon: "logo/more.png", models: ["seedance-1.0-pro", "seedance-1.0-lite", "seedance-1.0-fast"] },
+  { key: "ltx", label: "LTX", icon: "logo/more.png", models: ["ltx-2-fast", "ltx-2-pro", "ltx-2-audio"] },
+  { key: "vidu", label: "Vidu", icon: "logo/more.png", models: ["vidu", "vidu-q1"] },
+  { key: "other", label: "其他", icon: "logo/more.png", models: ["grok-imagine-video", "hunyuan-video-1.5", "svi-2.0-pro", "amazon-nova-reel-1.1", "kling-avatar-pro", "omnihuman", "ray2", "mochi-preview"] },
+];
+
+// 音频模型：API 小写，展示可大写
+function toAudioModelDisplayName(modelId) {
+  const id = String(modelId ?? "").trim().toLowerCase();
+  return id.split("-").map(function (s) {
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  }).join("-");
+}
+
+// 音频模型：与产品列表一致，API 小写（如 ElevenLabs-V3 -> elevenlabs-v3）
+const MODEL_GROUPS_AUDIO = [
+  { key: "elevenlabs", label: "ElevenLabs", icon: "logo/more.png", models: ["elevenlabs-music", "elevenlabs-v3", "elevenlabs-v2.5-turbo"] },
+  { key: "google", label: "Google", icon: "logo/more.png", models: ["gemini-2.5-pro-tts", "gemini-2.5-flash-tts", "lyria"] },
+  { key: "hailuo", label: "Hailuo", icon: "logo/more.png", models: ["hailuo-speech-02", "hailuo-music-v1.5"] },
+  { key: "sonic", label: "Sonic", icon: "logo/more.png", models: ["sonic-3.0", "sonic-2.0"] },
+  { key: "stable-audio", label: "Stable-Audio", icon: "logo/more.png", models: ["stable-audio-2.5", "stable-audio-2.0"] },
+  { key: "other", label: "其他", icon: "logo/more.png", models: ["unreal-speech-tts", "orpheus-tts", "whisper-v3-large-t", "mmaudio-v2"] },
 ];
 
 const ALL_MODELS_PILL = {
@@ -245,7 +208,21 @@ function isVideoQuickModelMode() {
   }
 }
 
+function isAudioQuickModelMode() {
+  try {
+    return (
+      typeof activeSideKind !== "undefined" &&
+      typeof activePromptKey !== "undefined" &&
+      activeSideKind === "prompt" &&
+      activePromptKey === "audio"
+    );
+  } catch (_) {
+    return false;
+  }
+}
+
 function getPillbarModelGroups() {
+  if (isAudioQuickModelMode()) return MODEL_GROUPS_AUDIO;
   if (isVideoQuickModelMode()) return MODEL_GROUPS_VIDEO;
   if (isDrawQuickModelMode()) return MODEL_GROUPS_DRAW;
   return MODEL_GROUPS_DEFAULT;
@@ -319,7 +296,9 @@ function applySelectedModel(modelId, options = {}) {
     modelEl.dataset.modelId = next;
     modelEl.textContent = isVideoQuickModelMode()
       ? toVideoModelDisplayName(next)
-      : next;
+      : isAudioQuickModelMode()
+        ? toAudioModelDisplayName(next)
+        : next;
   }
   const persist = options?.persist !== false;
   if (persist) {
@@ -361,12 +340,13 @@ function renderModelPopList(group) {
   if (!modelPopList || !group) return;
   const current = normalizeToken(getSelectedModelValue());
   const showVideoDisplay = isVideoQuickModelMode();
+  const showAudioDisplay = isAudioQuickModelMode();
   modelPopList.innerHTML = "";
   group.models.forEach((modelId) => {
     const item = document.createElement("button");
     item.type = "button";
     item.className = "model-pop-item";
-    item.textContent = showVideoDisplay ? toVideoModelDisplayName(modelId) : modelId;
+    item.textContent = showVideoDisplay ? toVideoModelDisplayName(modelId) : showAudioDisplay ? toAudioModelDisplayName(modelId) : modelId;
     item.dataset.model = modelId;
     const isActive = normalizeToken(modelId) === current;
     if (isActive) item.classList.add("active");
@@ -501,7 +481,7 @@ function scheduleHoverClose(delay = 120) {
 let lastPillbarMode = "";
 
 function updateModelPillbarForContext(force = false) {
-  const mode = isDrawQuickModelMode() ? "draw" : isVideoQuickModelMode() ? "video" : "default";
+  const mode = isDrawQuickModelMode() ? "draw" : isVideoQuickModelMode() ? "video" : isAudioQuickModelMode() ? "audio" : "default";
   if (!force && mode === lastPillbarMode) {
     syncPillbarToSelectedModel();
     return;

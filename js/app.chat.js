@@ -1,14 +1,24 @@
-function buildSystemMessage(model) {
-  const now = new Date();
-  // 你示例里的 system 内容格式
-  const sysText =
-    '如果需要输出公式，除非用户特别要求，请使用双美元符号，不要使用方括号。\n' +
-    `Current model: ${model}\n` +
-    `Current time: ${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")} ` +
-    `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}\n` +
-    'Latex inline: $x^2$\n' +
-    'Latex block: $$e=mc^2$$\n';
+function isTtsOrAudioModel(modelId) {
+  const id = String(modelId ?? "").trim().toLowerCase();
+  return (
+    /^elevenlabs-|^gemini-.*-tts|^lyria$|^hailuo-(speech|music)|^sonic-|^stable-audio-|^unreal-speech-tts|^orpheus-tts|^whisper-|^mmaudio-/i.test(id)
+  );
+}
 
+function buildSystemMessage(model) {
+  if (isTtsOrAudioModel(model)) {
+    return { role: "system", content: "" };
+  }
+  const now = new Date();
+  const timeStr =
+    `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")} ` +
+    `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+  const base = `Current model: ${model}\nCurrent time: ${timeStr}\n`;
+  const sysText =
+    base +
+    "如果需要输出公式，除非用户特别要求，请使用双美元符号，不要使用方括号。\n" +
+    "Latex inline: $x^2$\n" +
+    "Latex block: $$e=mc^2$$\n";
   return { role: "system", content: sysText };
 }
 
@@ -506,6 +516,18 @@ async function generateAssistantResponse(userText, userContentOverride) {
           const mergedMusic = mergeGeneratingMusicProgress(assistantText);
           if (mergedMusic !== assistantText) {
             assistantText = mergedMusic;
+          }
+        }
+        if (typeof mergeGeneratingAudioProgress === "function") {
+          const mergedAudio = mergeGeneratingAudioProgress(assistantText);
+          if (mergedAudio !== assistantText) {
+            assistantText = mergedAudio;
+          }
+        }
+        if (typeof mergeGeneratingSynthesizeProgress === "function") {
+          const mergedSynth = mergeGeneratingSynthesizeProgress(assistantText);
+          if (mergedSynth !== assistantText) {
+            assistantText = mergedSynth;
           }
         }
 
