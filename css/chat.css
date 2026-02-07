@@ -338,6 +338,40 @@
 	}
 }
 
+/* ============ 正在生成（视频等）：无限进度条 + Generating (Ns) ============ */
+.generating-placeholder {
+	margin-top: 2px;
+}
+.generating-progress {
+	height: 6px;
+	border-radius: 3px;
+	background: var(--line);
+	overflow: hidden;
+	margin-bottom: 10px;
+}
+.generating-progress-bar {
+	height: 100%;
+	width: 32%;
+	border-radius: 3px;
+	background: var(--primary, #0ea5e9);
+	animation: generatingProgress 1.6s ease-in-out infinite;
+}
+@keyframes generatingProgress {
+	0% { transform: translateX(-100%); }
+	50% { transform: translateX(220%); }
+	100% { transform: translateX(-100%); }
+}
+.generating-hint {
+	font-weight: 600;
+	letter-spacing: .2px;
+	color: var(--text);
+}
+.generating-note {
+	font-size: 0.9em;
+	color: var(--muted);
+	margin-top: 6px;
+}
+
 /* ============ 视频播放块：预览、下载、倍速（浅色风格） ============ */
 .msg-video-wrap {
 	margin-top: 12px;

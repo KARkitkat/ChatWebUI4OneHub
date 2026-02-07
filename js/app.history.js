@@ -70,22 +70,31 @@ let composerWrap = null;
 const promptTranslateBtn = document.querySelector('.side-item[data-prompt="translate"]');
 const promptOptimizeBtn = document.querySelector('.side-item[data-prompt="optimize"]');
 const promptDrawBtn = document.querySelector('.side-item[data-prompt="draw"]');
+const promptVideoBtn = document.querySelector('.side-item[data-prompt="video"]');
 
 const PROMPT_TEXTS = {
   translate: "请将以下文本翻译成英文：\n",
   optimize: "请优化以下文本，使其更清晰、更流畅：\n",
   draw: "创建一幅图片：",
+  video: "创作一段视频：",
 };
 
 const DRAW_AUTO_MODEL_ID = "nano-banana";
+const VIDEO_AUTO_MODEL_ID = "sora-2-pro";
 const DRAW_MODEL_STORAGE_KEY =
   typeof MODEL_STORAGE_KEY === "string" ? MODEL_STORAGE_KEY : "selected_model_v1";
+const VIDEO_MODEL_STORAGE_KEY = "selected_video_model_v1";
 let drawAutoModelEnabled = false;
 let drawAutoModelRestore = "";
+let videoAutoModelEnabled = false;
+let videoAutoModelRestore = "";
 
 function getCurrentSelectedModelValue() {
   const el = document.getElementById("selected-model");
-  return el ? String(el.textContent || "").trim() : "";
+  if (!el) return "";
+  const fromData = el.dataset.modelId;
+  if (fromData !== undefined && fromData !== "") return String(fromData).trim();
+  return String(el.textContent || "").trim();
 }
 
 function drawAutoNormalizeModelId(value) {
@@ -140,6 +149,59 @@ function disableDrawAutoModel() {
     drawAutoApplySelectedModel(target, { persist: false });
   }
   drawAutoModelRestore = "";
+}
+
+function videoAutoGetSelectedModelValue() {
+  return getCurrentSelectedModelValue();
+}
+
+function videoAutoApplySelectedModel(modelId, options = {}) {
+  const next = String(modelId ?? "").trim();
+  if (!next) return;
+  if (typeof setSelectedModel === "function") {
+    setSelectedModel(next, options);
+    return;
+  }
+  const modelEl = document.getElementById("selected-model");
+  if (modelEl) {
+    modelEl.dataset.modelId = next;
+    modelEl.textContent = next;
+  }
+  const persist = options?.persist !== false;
+  if (persist) {
+    try {
+      localStorage.setItem(VIDEO_MODEL_STORAGE_KEY, next);
+    } catch (_) {}
+  }
+  document.dispatchEvent(new CustomEvent("model:selected", { detail: { modelId: next } }));
+}
+
+function enableVideoAutoModel() {
+  if (!videoAutoModelEnabled) {
+    videoAutoModelRestore = videoAutoGetSelectedModelValue();
+  }
+  videoAutoModelEnabled = true;
+  if (
+    drawAutoNormalizeModelId(videoAutoGetSelectedModelValue()) !==
+    drawAutoNormalizeModelId(VIDEO_AUTO_MODEL_ID)
+  ) {
+    videoAutoApplySelectedModel(VIDEO_AUTO_MODEL_ID, { persist: false });
+  }
+}
+
+function disableVideoAutoModel() {
+  if (!videoAutoModelEnabled) return;
+  videoAutoModelEnabled = false;
+  const stored = localStorage.getItem(VIDEO_MODEL_STORAGE_KEY) || "";
+  const target = stored || videoAutoModelRestore;
+  if (
+    target &&
+    drawAutoNormalizeModelId(target) !==
+      drawAutoNormalizeModelId(videoAutoGetSelectedModelValue())
+  ) {
+    videoAutoApplySelectedModel(target, { persist: false });
+  }
+  videoAutoModelRestore = "";
 }
 
 function escapeHtml(s) {
@@ -473,6 +535,9 @@ function syncSideSelection() {
     if (activePromptKey === "draw") {
       promptDrawBtn?.classList.add("is-active");
     }
+    if (activePromptKey === "video") {
+      promptVideoBtn?.classList.add("is-active");
+    }
   }
 
   if (activeSideKind === "session" && sessionsGroupEl) {
@@ -494,6 +559,7 @@ function setActiveSideKind(kind, options = {}) {
   const keepModel = Boolean(options?.keepModel);
   if (activeSideKind !== "prompt" && !keepModel) {
     disableDrawAutoModel();
+    disableVideoAutoModel();
   }
   syncSideSelection();
   syncTopbarVisibility();
@@ -519,6 +585,9 @@ function clearPromptSelection(options = {}) {
   const keepModel = Boolean(options?.keepModel);
   if (drawAutoModelEnabled && !keepModel) {
     disableDrawAutoModel();
+  }
+  if (videoAutoModelEnabled && !keepModel) {
+    disableVideoAutoModel();
   }
   if (!activePromptKey) return;
   ta.value = stripPromptPrefix(ta.value || "", activePromptKey);
@@ -627,8 +696,13 @@ function activatePrompt(key) {
   setActiveSideKind("prompt");
   if (key === "draw") {
     enableDrawAutoModel();
+    disableVideoAutoModel();
+  } else if (key === "video") {
+    enableVideoAutoModel();
+    disableDrawAutoModel();
   } else {
     disableDrawAutoModel();
+    disableVideoAutoModel();
     applySessionModel("gpt-4");
   }
   syncHeight();
@@ -657,8 +731,9 @@ async function saveCurrentChatToServer() {
     // 模板（翻译/优化/绘图）首次生成会话后，自动切到“历史记录”条目，避免一直停留在模板选中态
     if (activeSideKind === "prompt" && activePromptKey) {
       const keepDrawModel = activePromptKey === "draw";
-      clearPromptSelection({ keepModel: keepDrawModel });
-      setActiveSideKind("session", { keepModel: keepDrawModel });
+      const keepVideoModel = activePromptKey === "video";
+      clearPromptSelection({ keepModel: keepDrawModel || keepVideoModel });
+      setActiveSideKind("session", { keepModel: keepDrawModel || keepVideoModel });
     }
     await refreshSessionsList();
   }
@@ -931,6 +1006,7 @@ function renderSessionsList(sessions) {
 
     item.addEventListener("click", async () => {
       if (ta.disabled) return; // 正在发送中，别切
+      if (window.isGenerating) return; // 正在生成（视频/音频等）时不可切换对话
 
       if (isBatchDeleteMode) {
         if (batchSelectedIds.has(id)) batchSelectedIds.delete(id);
@@ -1052,6 +1128,15 @@ promptDrawBtn?.addEventListener("click", (ev) => {
     startNewChat();
   }
   activatePrompt("draw");
+  scheduleSidebarClose();
+});
+
+promptVideoBtn?.addEventListener("click", (ev) => {
+  ev.stopPropagation();
+  if (activeSideKind === "session") {
+    startNewChat();
+  }
+  activatePrompt("video");
   scheduleSidebarClose();
 });
 

@@ -97,6 +97,96 @@ const MODEL_GROUPS_DRAW = [
   },
 ];
 
+// 视频模型：API 调用使用小写，展示可用大写；特殊展示名（如带括号）在此映射
+const VIDEO_MODEL_DISPLAY_NAMES = {
+  "grok-imagine-video": "Grok-Imagine-Video (xAI)",
+  "hunyuan-video-1.5": "Hunyuan-Video-1.5 (腾讯)",
+  "svi-2.0-pro": "SVI-2.0-Pro",
+  "amazon-nova-reel-1.1": "Amazon-Nova-Reel-1.1 (亚马逊)",
+  "kling-avatar-pro": "Kling-Avatar-Pro",
+  "omnihuman": "OmniHuman (字节跳动)",
+  "ray2": "Ray2 (智谱AI)",
+  "mochi-preview": "Mochi-preview",
+};
+
+function toVideoModelDisplayName(modelId) {
+  const id = String(modelId ?? "").trim().toLowerCase();
+  if (VIDEO_MODEL_DISPLAY_NAMES[id]) return VIDEO_MODEL_DISPLAY_NAMES[id];
+  return id.split("-").map(function (s) {
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  }).join("-");
+}
+
+const MODEL_GROUPS_VIDEO = [
+  {
+    key: "sora",
+    label: "Sora",
+    icon: "logo/more.png",
+    models: ["sora-2-pro", "sora-2", "sora"],
+  },
+  {
+    key: "veo",
+    label: "Veo",
+    icon: "logo/more.png",
+    models: [
+      "veo-3.1", "veo-3", "veo-3.1-fast", "veo-3-fast", "veo-3-vfast",
+      "veo-2", "veo-2-video", "veo-v3.1", "veo-v3.1-fast",
+    ],
+  },
+  {
+    key: "wan",
+    label: "Wan",
+    icon: "logo/more.png",
+    models: ["wan-2.6", "wan-2.5", "wan-2.1", "wan-animate", "wan-2.2"],
+  },
+  {
+    key: "hailuo",
+    label: "Hailuo",
+    icon: "logo/more.png",
+    models: [
+      "hailuo-director-01", "hailuo-02", "hailuo-02-standard",
+      "hailuo-02-pro", "hailuo-live", "hailuo-ai",
+    ],
+  },
+  {
+    key: "pixverse",
+    label: "Pixverse",
+    icon: "logo/more.png",
+    models: ["pixverse-v5", "pixverse-v4.5"],
+  },
+  {
+    key: "seedance",
+    label: "Seedance",
+    icon: "logo/more.png",
+    models: ["seedance-1.0-pro", "seedance-1.0-lite", "seedance-1.0-fast"],
+  },
+  {
+    key: "ltx",
+    label: "LTX",
+    icon: "logo/more.png",
+    models: ["ltx-2-fast", "ltx-2-pro", "ltx-2-audio"],
+  },
+  {
+    key: "vidu",
+    label: "Vidu",
+    icon: "logo/more.png",
+    models: ["vidu", "vidu-q1"],
+  },
+  {
+    key: "other",
+    label: "其他",
+    icon: "logo/more.png",
+    models: [
+      "runwaygen-4.5", "runway-gen-4-turbo", "runway",
+      "kling-2.6-pro", "kling-2.5-turbo-pro", "kling-omni", "kling-2.5-turbo-std",
+      "kling-2.1-master", "kling-2.1-pro", "kling-2.1-std", "kling-2.0-master",
+      "kling-1.6-pro", "kling-1.5-pro", "kling-pro-effects",
+      "grok-imagine-video", "hunyuan-video-1.5", "svi-2.0-pro",
+      "amazon-nova-reel-1.1", "kling-avatar-pro", "omnihuman", "ray2", "mochi-preview",
+    ],
+  },
+];
+
 const ALL_MODELS_PILL = {
   key: "all",
   label: "全部",
@@ -142,13 +232,31 @@ function isDrawQuickModelMode() {
   }
 }
 
+function isVideoQuickModelMode() {
+  try {
+    return (
+      typeof activeSideKind !== "undefined" &&
+      typeof activePromptKey !== "undefined" &&
+      activeSideKind === "prompt" &&
+      activePromptKey === "video"
+    );
+  } catch (_) {
+    return false;
+  }
+}
+
 function getPillbarModelGroups() {
-  return isDrawQuickModelMode() ? MODEL_GROUPS_DRAW : MODEL_GROUPS_DEFAULT;
+  if (isVideoQuickModelMode()) return MODEL_GROUPS_VIDEO;
+  if (isDrawQuickModelMode()) return MODEL_GROUPS_DRAW;
+  return MODEL_GROUPS_DEFAULT;
 }
 
 function getSelectedModelValue() {
   const el = document.getElementById("selected-model");
-  return el ? String(el.textContent || "").trim() : "";
+  if (!el) return "";
+  const fromData = el.dataset.modelId;
+  if (fromData !== undefined && fromData !== "") return String(fromData).trim();
+  return String(el.textContent || "").trim();
 }
 
 function getModelPrefix(modelId) {
@@ -206,12 +314,13 @@ function syncPillbarToSelectedModel() {
 function applySelectedModel(modelId, options = {}) {
   const next = String(modelId ?? "").trim();
   if (!next) return;
-  if (typeof window.setSelectedModel === "function") {
-    window.setSelectedModel(next, options);
-    return;
-  }
   const modelEl = document.getElementById("selected-model");
-  if (modelEl) modelEl.textContent = next;
+  if (modelEl) {
+    modelEl.dataset.modelId = next;
+    modelEl.textContent = isVideoQuickModelMode()
+      ? toVideoModelDisplayName(next)
+      : next;
+  }
   const persist = options?.persist !== false;
   if (persist) {
     try {
@@ -222,6 +331,7 @@ function applySelectedModel(modelId, options = {}) {
     new CustomEvent("model:selected", { detail: { modelId: next } })
   );
 }
+window.applySelectedModel = applySelectedModel;
 
 function ensureModelPop() {
   if (modelPopEl) return modelPopEl;
@@ -250,12 +360,13 @@ function ensureModelPop() {
 function renderModelPopList(group) {
   if (!modelPopList || !group) return;
   const current = normalizeToken(getSelectedModelValue());
+  const showVideoDisplay = isVideoQuickModelMode();
   modelPopList.innerHTML = "";
   group.models.forEach((modelId) => {
     const item = document.createElement("button");
     item.type = "button";
     item.className = "model-pop-item";
-    item.textContent = modelId;
+    item.textContent = showVideoDisplay ? toVideoModelDisplayName(modelId) : modelId;
     item.dataset.model = modelId;
     const isActive = normalizeToken(modelId) === current;
     if (isActive) item.classList.add("active");
@@ -390,7 +501,7 @@ function scheduleHoverClose(delay = 120) {
 let lastPillbarMode = "";
 
 function updateModelPillbarForContext(force = false) {
-  const mode = isDrawQuickModelMode() ? "draw" : "default";
+  const mode = isDrawQuickModelMode() ? "draw" : isVideoQuickModelMode() ? "video" : "default";
   if (!force && mode === lastPillbarMode) {
     syncPillbarToSelectedModel();
     return;

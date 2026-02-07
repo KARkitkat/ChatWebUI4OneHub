@@ -270,6 +270,7 @@ function setSending(isSending) {
   const next = Boolean(isSending);
   isGenerating = next;
   window.isGenerating = next;
+  document.body.classList.toggle("is-generating", next);
   updateSendButtonMode(next);
   if (send) {
     send.disabled = next ? false : ta.value.trim().length === 0;
@@ -317,8 +318,11 @@ function createSSEParser(onData) {
 
 // ============ ✅ 核心：发送消息 -> /v1/chat/completions（stream） ============
 async function sendChatMessage(userText, userContentOverride, signal) {
+  const modelEl = document.getElementById("selected-model");
   const model = (
-    document.getElementById("selected-model")?.innerText || "gpt-4"
+    (modelEl?.dataset?.modelId !== undefined && modelEl.dataset.modelId !== "")
+      ? modelEl.dataset.modelId
+      : (modelEl?.innerText || "gpt-4")
   ).trim();
 
   const systemMsg = buildSystemMessage(model);
@@ -371,25 +375,64 @@ async function sendChatMessage(userText, userContentOverride, signal) {
   return resp.body;
 }
 
+function buildGeneratingPlaceholderHtml(seconds, dotCount) {
+  const dots = dotCount === 0 ? "." : dotCount === 1 ? ".." : "...";
+  return (
+    '<div class="generating-placeholder">' +
+    '<div class="generating-progress" role="progressbar" aria-valuetext="正在生成">' +
+    '<div class="generating-progress-bar"></div></div>' +
+    '<div class="generating-hint">' +
+    '<span class="generating-text">Generating' + dots + '</span> <span class="generating-time">(' + seconds + 's)</span>' +
+    '</div>' +
+    '<div class="generating-note">正在生成，这可能需要数分钟</div></div>'
+  );
+}
+
 async function generateAssistantResponse(userText, userContentOverride) {
   const assistantMsg = { role: "assistant", content: "" };
   ensureMessageId(assistantMsg);
   chatHistory.push(assistantMsg);
   const assistantBubble = appendMessage("assistant", "", assistantMsg);
   assistantBubble.classList.add("is-typing");
+  const generatingStartTime = Date.now();
+  let generatingPlaceholderInterval = null;
   setBubbleHtml(
     assistantBubble,
-    '<span class="typing-hint">AI 正在输入<span class="typing-dots"><i></i><i></i><i></i></span></span>'
+    buildGeneratingPlaceholderHtml(0, 0)
   );
   assistantBubble.dataset.rawMd = "";
   ensureMessageActions(assistantBubble, "assistant");
   setSending(true);
+
+  generatingPlaceholderInterval = setInterval(() => {
+    if (!assistantBubble.closest(".msg-row") || !assistantBubble.classList.contains("is-typing")) {
+      if (generatingPlaceholderInterval) clearInterval(generatingPlaceholderInterval);
+      return;
+    }
+    const elapsed = Math.floor((Date.now() - generatingStartTime) / 1000);
+    const dotCount = elapsed % 3;
+    const dots = dotCount === 0 ? "." : dotCount === 1 ? ".." : "...";
+    const content = assistantBubble.querySelector(".msg-content");
+    if (content) {
+      const textEl = content.querySelector(".generating-text");
+      const timeEl = content.querySelector(".generating-time");
+      if (textEl) textEl.textContent = "Generating" + dots;
+      if (timeEl) timeEl.textContent = "(" + elapsed + "s)";
+    }
+  }, 1000);
 
   let hasAssistantOutput = false;
   let aborted = false;
   let abortedNeedsSave = false;
   activeAbortController = new AbortController();
   const abortSignal = activeAbortController.signal;
+
+  function clearGeneratingInterval() {
+    if (generatingPlaceholderInterval) {
+      clearInterval(generatingPlaceholderInterval);
+      generatingPlaceholderInterval = null;
+    }
+  }
 
   try {
     const stream = await sendChatMessage(userText, userContentOverride, abortSignal);
@@ -455,12 +498,14 @@ async function generateAssistantResponse(userText, userContentOverride) {
           }
         }
 
-        if (!hasAssistantOutput && assistantText.trim() !== "") {
+        const onlyGenerating = typeof isOnlyGeneratingProgress === "function" && isOnlyGeneratingProgress(assistantText);
+        if (!hasAssistantOutput && assistantText.trim() !== "" && !onlyGenerating) {
           hasAssistantOutput = true;
+          clearGeneratingInterval();
           assistantBubble.classList.remove("is-typing");
         }
 
-        if (!hasAssistantOutput && assistantText.trim() === "") {
+        if (!hasAssistantOutput && (assistantText.trim() === "" || onlyGenerating)) {
           return;
         }
 
@@ -572,6 +617,7 @@ async function generateAssistantResponse(userText, userContentOverride) {
       await saveCurrentChatToServer();
     } catch (_) {}
   } finally {
+    clearGeneratingInterval();
     if (aborted && abortedNeedsSave) {
       try {
         await saveCurrentChatToServer();

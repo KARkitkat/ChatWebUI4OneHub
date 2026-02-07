@@ -119,10 +119,10 @@ function mergeGeneratingImageProgress(input) {
   return out;
 }
 
-// 合并视频生成进度行（多种格式只保留最后一条）：Generating... (**Ns** elapsed)、Generating video (Ns elapsed)、Generating video (N/Ms elapsed)
+// 合并视频生成进度行（多种格式只保留最后一条）：Generating. (Ns)、Generating.. (Ns)、Generating... (Ns)、Generating... (**Ns** elapsed)、Generating video (Ns elapsed) 等
 function mergeGeneratingVideoProgress(input) {
   const text = String(input ?? "");
-  const re = /Generating(?:\.\.\.\s*\(\*\*\d+s\*\* elapsed\)| video \(\d+(?:\/\d+)?s elapsed\))/gi;
+  const re = /Generating(?:\.{1,3}\s*\(\d+s\)|\.\.\.\s*\(\*\*\d+s\*\* elapsed\)| video \(\d+(?:\/\d+)?s elapsed\))/gi;
   const matches = [];
   let m;
 
@@ -142,8 +142,8 @@ function mergeGeneratingVideoProgress(input) {
     out += text.slice(cursor, start);
 
     let j = i;
-    let lastVal = matches[i].value;
-    let seqEnd = matches[i].end;
+    let lastVal = matches[j].value;
+    let seqEnd = matches[j].end;
 
     while (j + 1 < matches.length) {
       const gap = text.slice(matches[j].end, matches[j + 1].start);
@@ -163,6 +163,23 @@ function mergeGeneratingVideoProgress(input) {
 
   out += text.slice(cursor);
   return out;
+}
+
+// 判断内容是否仅为视频/生成类进度（无最终链接等），用于继续显示「正在生成」占位
+Generating. (12s)// 流式可能为片段如 "Generating. (0s)Gen"，故先去掉所有完整进度段，再看剩余是否为空或未收齐的 "Generating"
+function isOnlyGeneratingProgress(text) {
+  const t = String(text ?? "").trim();
+  if (!t) return true;
+  if (/https?:\/\//i.test(t)) return false;
+  let rest = t
+    .replace(/Generating\.{1,3}\s*\(\d+s\)/gi, "")
+    .replace(/Generating(?:\.\.\.\s*\(\*\*\d+s\*\* elapsed\)| video \(\d+(?:\/\d+)?s elapsed\))/gi, "")
+    .trim();
+  rest = rest.replace(/\s*Generating\.{0,3}\s*$/i, "").trim();
+  if (rest === "") return true;
+  if (/^Generating\.{0,3}$/i.test(rest)) return true;
+  if (/^Generat/i.test(rest) && rest.length < 12) return true;
+  return false;
 }
 
 // 合并 "Generating Music (Ns elapsed)" 进度行，只保留最后一条

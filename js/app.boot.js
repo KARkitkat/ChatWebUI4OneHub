@@ -65,6 +65,10 @@ const selectedModelEl = document.getElementById("selected-model");
 function setSelectedModel(modelId, options = {}) {
   const next = String(modelId ?? "").trim();
   if (!selectedModelEl || !next) return;
+  if (typeof window.applySelectedModel === "function") {
+    window.applySelectedModel(modelId, options);
+    return;
+  }
   selectedModelEl.textContent = next;
   const persist = options?.persist !== false;
   if (persist) {
