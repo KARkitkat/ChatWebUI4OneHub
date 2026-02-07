@@ -330,7 +330,8 @@
 }
 
 /* 正在生成（视频/音频等）时，侧边栏所有功能禁用 */
-body.is-generating .sidebar .side-item {
+body.is-generating .sidebar .side-item,
+body.is-generating .sidebar .side-title-btn {
 	pointer-events: none;
 	opacity: 0.6;
 	cursor: not-allowed;

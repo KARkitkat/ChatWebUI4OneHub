@@ -166,7 +166,7 @@ function mergeGeneratingVideoProgress(input) {
 }
 
 // 判断内容是否仅为视频/生成类进度（无最终链接等），用于继续显示「正在生成」占位
-Generating. (12s)// 流式可能为片段如 "Generating. (0s)Gen"，故先去掉所有完整进度段，再看剩余是否为空或未收齐的 "Generating"
+// 流式可能为片段如 "Generating. (0s)Gen"，故先去掉所有完整进度段，再看剩余是否为空或未收齐的 "Generating"
 function isOnlyGeneratingProgress(text) {
   const t = String(text ?? "").trim();
   if (!t) return true;

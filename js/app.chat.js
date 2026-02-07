@@ -55,6 +55,17 @@ function resolveQuotaErrorMessage(err) {
   return "";
 }
 
+const REQUEST_ERROR_SUGGESTION = "请更换ai再次尝试。";
+
+function formatRequestErrorMessage(err) {
+  const raw = String(err?.message ?? err ?? "").trim();
+  if (!raw) return "请求异常。" + REQUEST_ERROR_SUGGESTION;
+  if (/Failed to fetch|NetworkError|Load failed|network request failed/i.test(raw)) {
+    return "网络请求失败（可能是超时或跨域限制）。" + REQUEST_ERROR_SUGGESTION;
+  }
+  return "请求异常：" + raw + "。" + REQUEST_ERROR_SUGGESTION;
+}
+
 function updateSendButtonMode(isSending) {
   if (!send) return;
   if (isSending) {
@@ -606,7 +617,7 @@ async function generateAssistantResponse(userText, userContentOverride) {
 
     console.error(err);
     const quotaMsg = resolveQuotaErrorMessage(err);
-    const msg = quotaMsg || ("请求异常：" + (err?.message || String(err)));
+    const msg = quotaMsg || formatRequestErrorMessage(err);
     assistantBubble.classList.remove("is-typing");
     setBubbleText(assistantBubble, msg);
     assistantBubble.dataset.rawMd = msg;
@@ -634,8 +645,12 @@ async function generateAssistantResponse(userText, userContentOverride) {
 // 绑定发送按钮：真正发请求 + 实时渲染流式输出
 send.addEventListener("click", async () => {
   if (isGenerating) {
-    interruptCurrentGeneration();
-    return;
+    if (activeAbortController) {
+      interruptCurrentGeneration();
+      return;
+    }
+    // 状态卡住时（如流未正确结束）恢复为可发送
+    setSending(false);
   }
   const text = ta.value.trim();
   if (!text) return;
@@ -685,7 +700,7 @@ send.addEventListener("click", async () => {
     await generateAssistantResponse(text, userParts);
   } catch (err) {
     setSending(false);
-    appendMessage("assistant", "请求异常：" + (err?.message || String(err)));
+    appendMessage("assistant", formatRequestErrorMessage(err));
   }
 });
 

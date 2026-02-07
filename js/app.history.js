@@ -80,7 +80,7 @@ const PROMPT_TEXTS = {
 };
 
 const DRAW_AUTO_MODEL_ID = "nano-banana";
-const VIDEO_AUTO_MODEL_ID = "sora-2-pro";
+const VIDEO_AUTO_MODEL_ID = "veo-3.1";
 const DRAW_MODEL_STORAGE_KEY =
   typeof MODEL_STORAGE_KEY === "string" ? MODEL_STORAGE_KEY : "selected_model_v1";
 const VIDEO_MODEL_STORAGE_KEY = "selected_video_model_v1";
@@ -1096,6 +1096,7 @@ function startNewChat(options = {}) {
 newChatBtn = document.querySelector(".side-item.primary");
 newChatBtn?.addEventListener("click", () => {
   if (ta.disabled) return;
+  if (window.isGenerating) return;
   clearPromptSelection();
   setActiveSideKind("new");
   startNewChat();
@@ -1106,6 +1107,7 @@ syncTopbarVisibility();
 
 promptTranslateBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
+  if (window.isGenerating) return;
   if (activeSideKind === "session") {
     startNewChat();
   }
@@ -1115,6 +1117,7 @@ promptTranslateBtn?.addEventListener("click", (ev) => {
 
 promptOptimizeBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
+  if (window.isGenerating) return;
   if (activeSideKind === "session") {
     startNewChat();
   }
@@ -1124,6 +1127,7 @@ promptOptimizeBtn?.addEventListener("click", (ev) => {
 
 promptDrawBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
+  if (window.isGenerating) return;
   if (activeSideKind === "session") {
     startNewChat();
   }
@@ -1133,6 +1137,7 @@ promptDrawBtn?.addEventListener("click", (ev) => {
 
 promptVideoBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
+  if (window.isGenerating) return;
   if (activeSideKind === "session") {
     startNewChat();
   }
