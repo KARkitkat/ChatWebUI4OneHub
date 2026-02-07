@@ -626,9 +626,14 @@ function ensureHighlightJs() {
 
     const link = document.querySelector('link[data-hljs-fallback="1"]');
     if (!link) {
+      const mainHljs = document.getElementById("hljs-style");
+      const href =
+        mainHljs && mainHljs.href
+          ? mainHljs.href
+          : "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css";
       const css = document.createElement("link");
       css.rel = "stylesheet";
-      css.href = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css";
+      css.href = href;
       css.setAttribute("data-hljs-fallback", "1");
       document.head.appendChild(css);
     }

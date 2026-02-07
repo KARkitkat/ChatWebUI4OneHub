@@ -1,0 +1,375 @@
+/* 主题切换按钮图标：默认显示太阳（日间），深色时显示月亮（夜间） */
+.mini#themeToggle .theme-icon {
+	display: inline-grid;
+	place-items: center;
+	grid-area: 1/1;
+}
+.mini#themeToggle .theme-icon-moon {
+	display: none;
+}
+html[data-theme="dark"] .mini#themeToggle .theme-icon-sun {
+	display: none;
+}
+html[data-theme="dark"] .mini#themeToggle .theme-icon-moon {
+	display: inline-grid;
+}
+
+/* 深色模式：主区域、侧栏、聊天、模型等组件覆盖 */
+html[data-theme="dark"] .topbar {
+	background: linear-gradient(180deg, rgba(15, 17, 23, 0.92), rgba(15, 17, 23, 0.7));
+}
+
+html[data-theme="dark"] .pillbar {
+	background: var(--panel2);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .pill {
+	color: var(--muted);
+}
+
+html[data-theme="dark"] .pill:hover {
+	background: var(--panel2);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .pill .dot {
+	background: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .pill.active .dot {
+	background: rgba(255, 255, 255, 0.25);
+}
+
+html[data-theme="dark"] .model-chip {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--text);
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme="dark"] .model-chip .badge {
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-chip .caret {
+	border-right-color: var(--muted2);
+	border-bottom-color: var(--muted2);
+}
+
+html[data-theme="dark"] .model-chip:hover {
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .composer {
+	background: var(--panel);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .composer:focus-within {
+	border-color: var(--line);
+	box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .icon-btn {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--muted);
+}
+
+html[data-theme="dark"] .icon-btn:hover {
+	background: var(--panel2);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .icon-btn.is-active {
+	background: var(--brand);
+	border-color: var(--brand);
+	color: #fff;
+}
+
+html[data-theme="dark"] .icon-btn.is-active:hover {
+	background: #79b8ff;
+	color: #fff;
+}
+
+html[data-theme="dark"] .hint {
+	color: var(--muted2);
+}
+
+/* 侧栏深色 */
+html[data-theme="dark"] .sidebar-scroll {
+	scrollbar-color: var(--line) transparent;
+}
+
+html[data-theme="dark"] .sidebar-scroll::-webkit-scrollbar-thumb {
+	background: var(--line);
+}
+
+html[data-theme="dark"] .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+	background: var(--muted2);
+}
+
+html[data-theme="dark"] .side-item {
+	color: var(--text);
+}
+
+html[data-theme="dark"] .side-item:hover {
+	background: var(--panel2);
+}
+
+html[data-theme="dark"] .side-item.is-active {
+	background: rgba(88, 166, 255, 0.15);
+	border-color: rgba(88, 166, 255, 0.35);
+}
+
+html[data-theme="dark"] .side-item.is-active:hover {
+	background: rgba(88, 166, 255, 0.2);
+}
+
+html[data-theme="dark"] .side-item.is-selected {
+	background: rgba(248, 113, 113, 0.15);
+	border-color: rgba(248, 113, 113, 0.35);
+}
+
+html[data-theme="dark"] .side-item.is-selected:hover {
+	background: rgba(248, 113, 113, 0.2);
+}
+
+html[data-theme="dark"] .side-balance {
+	background: var(--panel2);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .balance-label {
+	color: var(--muted);
+}
+
+html[data-theme="dark"] .balance-value {
+	color: var(--text);
+}
+
+html[data-theme="dark"] .mini-icons .mini {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--muted);
+}
+
+html[data-theme="dark"] .mini-icons .mini:hover {
+	background: var(--panel2);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+/* 聊天气泡与按钮深色 */
+html[data-theme="dark"] .msg-bubble.assistant {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .msg-action-btn {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--muted);
+}
+
+html[data-theme="dark"] .msg-action-btn:hover {
+	background: var(--panel2);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .msg-row.user .msg-edit-input {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.15);
+	border-color: rgba(255, 255, 255, 0.4);
+	caret-color: #fff;
+}
+
+html[data-theme="dark"] .msg-attach-chip {
+	background: var(--panel);
+	color: var(--text);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .msg-row.user .msg-attach-chip {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .msg-video-wrap,
+html[data-theme="dark"] .msg-audio-wrap {
+	background: var(--panel2);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .msg-video-player {
+	background: var(--panel);
+}
+
+html[data-theme="dark"] .msg-video-toolbar,
+html[data-theme="dark"] .msg-audio-toolbar {
+	background: var(--panel2);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .msg-video-speed,
+html[data-theme="dark"] .msg-audio-speed {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+/* Markdown 代码块深色 */
+html[data-theme="dark"] .msg-bubble.assistant.markdown-body code {
+	background: var(--panel2);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .msg-bubble.assistant.markdown-body pre {
+	background: var(--panel2);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .msg-bubble.assistant.markdown-body pre code {
+	background: transparent;
+	color: inherit;
+}
+
+/* 附件与模型选择器深色 */
+html[data-theme="dark"] .attach-chip {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .attach-thumb {
+	background: var(--panel2);
+}
+
+html[data-theme="dark"] .attach-remove:hover {
+	background: var(--panel2);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-dropdown {
+	background: var(--panel);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .model-item {
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-item:hover {
+	background-color: var(--panel2);
+}
+
+html[data-theme="dark"] .model-owner {
+	color: var(--muted);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .model-pop {
+	background: var(--panel);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .model-pop-item {
+	background: var(--panel2);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-pop-item:hover {
+	background: var(--line);
+}
+
+html[data-theme="dark"] .model-all-card {
+	background: var(--panel);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .model-all-header {
+	background: linear-gradient(180deg, rgba(22, 27, 34, 0.98), rgba(22, 27, 34, 0.9));
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .model-all-close {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-all-tab {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-all-tab:hover {
+	background: var(--panel2);
+}
+
+html[data-theme="dark"] .model-all-tab.active {
+	background: var(--brand);
+	border-color: var(--brand);
+	color: #fff;
+}
+
+html[data-theme="dark"] .model-all-tab.model-all-toggle:hover {
+	color: var(--text);
+	border-color: var(--line);
+}
+
+/* 全部模型弹窗：分组标题与模型卡片 */
+html[data-theme="dark"] .model-all-title {
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-all-body {
+	background: var(--panel);
+}
+
+html[data-theme="dark"] .model-all-content {
+	background: var(--panel);
+}
+
+html[data-theme="dark"] .model-group-title {
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-card {
+	background: var(--panel2);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-card:hover {
+	background: var(--line);
+	border-color: var(--muted2);
+	box-shadow: var(--shadow2);
+}
+
+html[data-theme="dark"] .model-card-icon {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-card-title {
+	color: var(--text);
+}
+
+html[data-theme="dark"] .model-all-state {
+	color: var(--muted2);
+}
+
+html[data-theme="dark"] .nested-overlay-card {
+	background: var(--panel);
+	border-color: var(--line);
+}
+
+html[data-theme="dark"] .nested-overlay-msg {
+	color: var(--text);
+}

@@ -115,3 +115,55 @@ const send = document.getElementById("send");
 const DEFAULT_PLACEHOLDER = ta?.getAttribute("placeholder") || "输入内容";
 window.isGenerating = false;
 
+// ============ 主题切换（日间/深色） ============
+const THEME_STORAGE_KEY = "theme";
+const HLJS_LIGHT = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css";
+const HLJS_DARK = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css";
+
+function getTheme() {
+  try {
+    return localStorage.getItem(THEME_STORAGE_KEY) || "light";
+  } catch (_) {
+    return "light";
+  }
+}
+
+function setTheme(next) {
+  const theme = next === "dark" ? "dark" : "light";
+  const root = document.documentElement;
+  if (theme === "dark") {
+    root.setAttribute("data-theme", "dark");
+  } else {
+    root.removeAttribute("data-theme");
+  }
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (_) {}
+  const hljsLink = document.getElementById("hljs-style");
+  if (hljsLink) {
+    hljsLink.href = theme === "dark" ? HLJS_DARK : HLJS_LIGHT;
+  }
+  const fallbackLink = document.querySelector('link[data-hljs-fallback="1"]');
+  if (fallbackLink) {
+    fallbackLink.href = theme === "dark" ? HLJS_DARK : HLJS_LIGHT;
+  }
+}
+
+function toggleTheme() {
+  setTheme(getTheme() === "dark" ? "light" : "dark");
+}
+
+function initTheme() {
+  const saved = getTheme();
+  setTheme(saved);
+  const btn = document.getElementById("themeToggle");
+  if (btn) {
+    btn.addEventListener("click", toggleTheme);
+  }
+}
+
+initTheme();
+window.setTheme = setTheme;
+window.getTheme = getTheme;
+window.toggleTheme = toggleTheme;
+
