@@ -161,6 +161,16 @@ html[data-theme="dark"] .mini-icons .mini:hover {
 	color: var(--text);
 }
 
+html[data-theme="dark"] .mini-icons .mini.mini-mobile .mini-qr-pop {
+	background: var(--panel);
+	border-color: var(--line);
+	box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+html[data-theme="dark"] .mini-icons .mini.mini-mobile .mini-qr-hint {
+	color: var(--muted);
+}
+
 /* 聊天气泡与按钮深色 */
 html[data-theme="dark"] .msg-bubble.assistant {
 	background: var(--panel);

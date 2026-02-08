@@ -748,15 +748,17 @@ function activatePrompt(key) {
   const prompt = PROMPT_TEXTS[key];
   if (prompt === undefined || (prompt === "" && key !== "audio")) return;
 
-  if (prompt) {
-    let content = ta.value || "";
-    if (activePromptKey && activePromptKey !== key) {
-      content = stripPromptPrefix(content, activePromptKey);
-    }
+  // 切换预设时清空输入框再填入当前预设内容，避免残留上一项文字
+  const presetText = key === "audio" ? "" : (prompt || "");
+  if (activePromptKey && activePromptKey !== key) {
+    ta.value = presetText;
+  } else if (!activePromptKey || activePromptKey === key) {
+    const content = ta.value || "";
     if (!content.startsWith(prompt)) {
-      content = content ? `${prompt}${content}` : prompt;
+      ta.value = content ? `${prompt}${content}` : (prompt || presetText);
+    } else {
+      ta.value = content;
     }
-    ta.value = content;
   }
   activePromptKey = key;
   setActiveSideKind("prompt");

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>聊天</title>
+    <title>topglobai-对话页</title>
     <script>
       (function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
     </script>
@@ -151,7 +151,7 @@
             </div>
             <a
               class="balance-upgrade"
-              href="https://topglobai.com/panel/topup"
+              href="https://img.topglobai.com/prise.html"
               target="_blank"
               rel="noopener"
             >升级</a>
@@ -160,7 +160,7 @@
             class="mini-icons"
             aria-label="底部快捷按钮"
           >
-            <div class="mini" title="移动端下载" onclick="window.open('https:\/\/topglobai.com');">
+            <div class="mini mini-mobile" title="移动端访问" onclick="window.open('https:\/\/topglobai.com');">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -170,6 +170,10 @@
                 <rect x="7" y="2" width="10" height="20" rx="2" />
                 <path d="M11 18h2" />
               </svg>
+              <div class="mini-qr-pop" aria-hidden="true">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&amp;data=https%3A%2F%2Ftopglobai.com%2F" alt="topglobai.com 二维码" width="140" height="140" />
+                <span class="mini-qr-hint">请在浏览器网址栏输入https://topglobai.com/ 或者使用浏览器扫描上方二维码</span>
+              </div>
             </div>
             <div class="mini" title="客服" onclick="window.open('https:\/\/topglobai.com');">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headset-icon lucide-headset">
