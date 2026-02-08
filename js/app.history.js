@@ -66,6 +66,7 @@ const sideGroups = document.querySelectorAll(".side-group");
 const sessionsGroupEl = sideGroups?.[sideGroups.length - 1] || null;
 const topbarEl = document.querySelector(".topbar");
 let newChatBtn = null;
+let isTranslateMode = false;
 let composerWrap = null;
 const promptTranslateBtn = document.querySelector('.side-item[data-prompt="translate"]');
 const promptOptimizeBtn = document.querySelector('.side-item[data-prompt="optimize"]');
@@ -580,6 +581,11 @@ function syncSideSelection() {
   const allItems = document.querySelectorAll(".side-item");
   allItems.forEach((item) => item.classList.remove("is-active"));
 
+  if (isTranslateMode && promptTranslateBtn) {
+    promptTranslateBtn.classList.add("is-active");
+    return;
+  }
+
   if (activeSideKind === "new" && newChatBtn) {
     newChatBtn.classList.add("is-active");
   }
@@ -631,9 +637,36 @@ function setActiveSideKind(kind, options = {}) {
 
 function syncTopbarVisibility() {
   if (!topbarEl) return;
-  const shouldShow = activeSideKind !== "session";
+  const shouldShow = !isTranslateMode && activeSideKind !== "session";
   topbarEl.style.display = shouldShow ? "" : "none";
 }
+
+function enterTranslateMode() {
+  isTranslateMode = true;
+  document.querySelector(".main")?.classList.add("translate-mode");
+  const panel = document.getElementById("translatePanel");
+  if (panel) {
+    panel.hidden = false;
+    panel.setAttribute("aria-hidden", "false");
+  }
+  syncSideSelection();
+  syncTopbarVisibility();
+}
+
+function exitTranslateMode() {
+  isTranslateMode = false;
+  document.querySelector(".main")?.classList.remove("translate-mode");
+  const panel = document.getElementById("translatePanel");
+  if (panel) {
+    panel.hidden = true;
+    panel.setAttribute("aria-hidden", "true");
+  }
+  syncSideSelection();
+  syncTopbarVisibility();
+}
+
+window.enterTranslateMode = enterTranslateMode;
+window.exitTranslateMode = exitTranslateMode;
 
 function stripPromptPrefix(text, key) {
   const prompt = PROMPT_TEXTS[key];
@@ -1091,6 +1124,7 @@ function renderSessionsList(sessions) {
         return;
       }
 
+      if (isTranslateMode) exitTranslateMode();
       clearPromptSelection();
       setActiveSideKind("session");
       try {
@@ -1172,6 +1206,9 @@ newChatBtn = document.querySelector(".side-item.primary");
 newChatBtn?.addEventListener("click", () => {
   if (ta.disabled) return;
   if (window.isGenerating) return;
+  if (isTranslateMode) {
+    exitTranslateMode();
+  }
   clearPromptSelection();
   setActiveSideKind("new");
   startNewChat();
@@ -1183,16 +1220,14 @@ syncTopbarVisibility();
 promptTranslateBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
   if (window.isGenerating) return;
-  if (activeSideKind === "session") {
-    startNewChat();
-  }
-  activatePrompt("translate");
+  enterTranslateMode();
   scheduleSidebarClose();
 });
 
 promptOptimizeBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
   if (window.isGenerating) return;
+  if (isTranslateMode) exitTranslateMode();
   if (activeSideKind === "session") {
     startNewChat();
   }
@@ -1203,6 +1238,7 @@ promptOptimizeBtn?.addEventListener("click", (ev) => {
 promptDrawBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
   if (window.isGenerating) return;
+  if (isTranslateMode) exitTranslateMode();
   if (activeSideKind === "session") {
     startNewChat();
   }
@@ -1213,6 +1249,7 @@ promptDrawBtn?.addEventListener("click", (ev) => {
 promptVideoBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
   if (window.isGenerating) return;
+  if (isTranslateMode) exitTranslateMode();
   if (activeSideKind === "session") {
     startNewChat();
   }
@@ -1223,6 +1260,7 @@ promptVideoBtn?.addEventListener("click", (ev) => {
 promptAudioBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
   if (window.isGenerating) return;
+  if (isTranslateMode) exitTranslateMode();
   if (activeSideKind === "session") {
     startNewChat();
   }

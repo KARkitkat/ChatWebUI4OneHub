@@ -362,6 +362,61 @@
             </div>
           </div>
         </div>
+
+        <!-- 文本翻译面板（类似 Google 翻译，不保存到数据库） -->
+        <section class="translate-panel" id="translatePanel" aria-hidden="true" hidden>
+          <div class="translate-panel-inner">
+            <div class="translate-header">
+              <h2 class="translate-title">文本翻译</h2>
+              <button type="button" class="translate-back" id="translateBackBtn" aria-label="返回">返回</button>
+            </div>
+            <div class="translate-toolbar">
+              <div class="translate-toolbar-row">
+                <label class="translate-label">输入语言</label>
+                <select id="translateFromLang" class="translate-select" aria-label="源语言"></select>
+              </div>
+              <div class="translate-toolbar-row">
+                <label class="translate-label">输出语言</label>
+                <select id="translateToLang" class="translate-select" aria-label="目标语言"></select>
+              </div>
+              <div class="translate-toolbar-row translate-toolbar-row-model">
+                <label class="translate-label">翻译模型</label>
+                <div class="translate-model-selects">
+                  <select id="translateModelGroup" class="translate-select" aria-label="模型大类">
+                    <option value="gpt">GPT</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="gemini">Gemini</option>
+                    <option value="claude">Claude</option>
+                    <option value="kimi">Kimi</option>
+                  </select>
+                  <select id="translateModel" class="translate-select translate-select-model" aria-label="模型小类">
+                    <!-- 由 JS 根据大类填充，默认 gpt-4 -->
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="translate-body">
+              <div class="translate-left-col">
+                <div class="translate-half translate-input-wrap">
+                  <textarea id="translateInput" class="translate-textarea" placeholder="在此输入要翻译的文本…" spellcheck="false"></textarea>
+                </div>
+                <div class="translate-actions">
+                  <button type="button" class="btn primary translate-btn-main" id="translateBtn">翻译</button>
+                  <button type="button" class="btn ghost" id="translateClearBtn">清空</button>
+                  <button type="button" class="btn ghost" id="translateCopyInputBtn" title="复制左侧内容">复制</button>
+                </div>
+              </div>
+              <div class="translate-right-col">
+                <div class="translate-half translate-output-wrap">
+                  <div id="translateOutput" class="translate-output placeholder" aria-live="polite">翻译结果将显示在这里</div>
+                </div>
+                <div class="translate-output-actions">
+                  <button type="button" class="btn ghost" id="translateCopyOutputBtn" title="复制右侧内容">复制</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -411,6 +466,8 @@
     <script src="js/app.billing.js?v=105"></script>
     <script src="js/app.markdown.js?v=105"></script>
     <script src="js/app.chat.js?v=105"></script>
+    <script src="js/app.translate-langs.js?v=105"></script>
+    <script src="js/app.translate.js?v=105"></script>
     <script src="js/app.search.js?v=105"></script>
     <script src="js/app.models.js?v=105"></script>
   </body>

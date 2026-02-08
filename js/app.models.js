@@ -424,6 +424,9 @@ function ensureAllModelsModal() {
           </svg>
         </button>
       </div>
+      <div class="model-all-search-wrap">
+        <input type="text" class="model-all-search" id="modelAllSearch" placeholder="搜索模型…" aria-label="搜索模型" autocomplete="off" />
+      </div>
       <div class="model-all-body">
         <div class="model-all-tabs" id="modelAllTabs"></div>
         <div class="model-all-content" id="modelAllContent"></div>
@@ -434,6 +437,17 @@ function ensureAllModelsModal() {
   allModelsModalEl = modal;
   allModelsTabsEl = modal.querySelector("#modelAllTabs");
   allModelsContentEl = modal.querySelector("#modelAllContent");
+  const searchInput = modal.querySelector("#modelAllSearch");
+  if (searchInput) {
+    searchInput.addEventListener("input", () => filterAllModelsBySearch());
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        searchInput.value = "";
+        filterAllModelsBySearch();
+        e.stopPropagation();
+      }
+    });
+  }
   const closeBtn = modal.querySelector(".model-all-close");
   closeBtn?.addEventListener("click", () => closeAllModelsModal());
   modal.addEventListener("click", (ev) => {
@@ -442,9 +456,36 @@ function ensureAllModelsModal() {
   return modal;
 }
 
+function filterAllModelsBySearch() {
+  const searchEl = allModelsModalEl?.querySelector("#modelAllSearch");
+  const query = String(searchEl?.value ?? "").trim().toLowerCase();
+  const groupKey = String(allModelsActiveGroup || "all");
+  const sections = allModelsModalEl?.querySelectorAll(".model-group");
+  if (!sections?.length) return;
+  sections.forEach((section) => {
+    const sectionKey = section.dataset.group || "";
+    const groupMatch = groupKey === "all" || sectionKey === groupKey;
+    const cards = section.querySelectorAll(".model-card");
+    let hasVisible = false;
+    cards.forEach((card) => {
+      const modelId = String(card.dataset.model ?? "").toLowerCase();
+      const groupLabel = String(card.dataset.groupLabel ?? "").toLowerCase();
+      const searchMatch = !query || modelId.includes(query) || groupLabel.includes(query);
+      const show = groupMatch && searchMatch;
+      card.style.display = show ? "" : "none";
+      if (show) hasVisible = true;
+    });
+    section.style.display = groupMatch && hasVisible ? "" : "none";
+  });
+}
+
 function openAllModelsModal() {
   ensureAllModelsModal();
   closeModelPop();
+  const searchInput = allModelsModalEl?.querySelector("#modelAllSearch");
+  if (searchInput) {
+    searchInput.value = "";
+  }
   allModelsModalEl.classList.add("show");
   allModelsModalEl.setAttribute("aria-hidden", "false");
   allPillEl?.classList.add("active");
@@ -703,6 +744,7 @@ function applyAllModelsGroupFilter() {
     const show = groupKey === "all" || key === groupKey;
     section.style.display = show ? "" : "none";
   });
+  filterAllModelsBySearch();
 }
 
 function renderAllModelsContent(groups) {
@@ -727,6 +769,7 @@ function renderAllModelsContent(groups) {
       btn.type = "button";
       btn.className = "model-card";
       btn.dataset.model = model.id;
+      btn.dataset.groupLabel = group.label || "";
 
       const iconWrap = document.createElement("span");
       iconWrap.className = "model-card-icon";

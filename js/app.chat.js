@@ -396,6 +396,67 @@ async function sendChatMessage(userText, userContentOverride, signal) {
   return resp.body;
 }
 
+// ============ 翻译专用：流式请求，不写入历史、不保存到数据库 ============
+async function streamTranslateToElement(modelId, prompt, outputEl, signal) {
+  const model = String(modelId || "gpt-4").trim();
+  const systemMsg = {
+    role: "system",
+    content: "你是翻译助手。请只输出翻译结果，不要解释、不要加标题或额外说明。",
+  };
+  const body = {
+    model,
+    temperature: 0.3,
+    presence_penalty: 0,
+    frequency_penalty: 0,
+    messages: [systemMsg, { role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const resp = await fetch("https://api.topglobai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + apiToken,
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
+    body: JSON.stringify(body),
+    signal,
+  });
+
+  if (!resp.ok) {
+    let errText = "";
+    try { errText = await resp.text(); } catch (_) {}
+    throw new Error(`请求失败: ${resp.status} ${errText || resp.statusText}`);
+  }
+  if (!resp.body) throw new Error("浏览器不支持流式读取。");
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let fullText = "";
+
+  const parse = createSSEParser((data) => {
+    if (data === "[DONE]") return;
+    let json;
+    try { json = JSON.parse(data); } catch (_) { return; }
+    const delta = json?.choices?.[0]?.delta?.content ?? json?.choices?.[0]?.message?.content ?? "";
+    if (delta) {
+      fullText += delta;
+      if (outputEl) {
+        outputEl.textContent = fullText;
+        outputEl.classList.remove("placeholder", "loading");
+      }
+    }
+  });
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    parse(decoder.decode(value, { stream: true }));
+  }
+
+  return fullText;
+}
+
 function buildGeneratingPlaceholderHtml(seconds, dotCount) {
   const dots = dotCount === 0 ? "." : dotCount === 1 ? ".." : "...";
   return (

@@ -189,6 +189,33 @@
 	box-shadow: var(--shadow2);
 }
 
+.model-all-search-wrap {
+	padding: 0 20px 12px;
+	flex-shrink: 0;
+	border-bottom: 1px solid var(--line);
+}
+
+.model-all-search {
+	width: 100%;
+	padding: 10px 14px 10px 36px;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	font-size: 14px;
+	background: #f9fafb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") no-repeat 12px center;
+	color: var(--text);
+	box-sizing: border-box;
+}
+
+.model-all-search::placeholder {
+	color: var(--muted);
+}
+
+.model-all-search:focus {
+	outline: none;
+	border-color: var(--brand);
+	background-color: #fff;
+}
+
 .model-all-body {
 	padding: 16px 20px 20px;
 	display: flex;

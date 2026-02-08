@@ -47,7 +47,7 @@ body {
 	overflow: hidden;
 }
 
-/* Sidebar toggle button (small screens) */
+/* Sidebar toggle button (small screens)，z-index 需高于 .app 主区域以免被遮挡无法点击 */
 .sidebar-toggle {
 	position: fixed;
 	top: 16px;
@@ -62,7 +62,7 @@ body {
 	justify-content: center;
 	color: var(--text);
 	box-shadow: var(--shadow2);
-	z-index: 24;
+	z-index: 30;
 	cursor: pointer;
 	transition: transform var(--duration), box-shadow var(--duration);
 }

@@ -228,3 +228,429 @@
   background: #f3f4f6;
   color: #111827;
 }
+
+/* ============ 文本翻译面板（Google 翻译风格，不保存到数据库） ============ */
+.main.translate-mode .content,
+.main.translate-mode .composer-wrap {
+  display: none !important;
+}
+
+.translate-panel {
+  display: none;
+  flex: 1;
+  overflow: auto;
+  padding: 24px 18px 32px;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.main.translate-mode .translate-panel {
+  display: block;
+}
+
+.translate-panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 360px;
+}
+
+.translate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.translate-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text, #111827);
+}
+
+.translate-back {
+  padding: 8px 16px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted, #6b7280);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.translate-back:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.translate-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+}
+
+.translate-toolbar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 翻译模型：两个下拉横向摆放、对齐 */
+.translate-toolbar-row-model {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.translate-model-selects {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.translate-model-selects .translate-select {
+  flex: 0 0 auto;
+}
+
+.translate-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted, #6b7280);
+}
+
+.translate-select {
+  min-width: 120px;
+  padding: 8px 12px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 10px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--text, #111827);
+  cursor: pointer;
+}
+
+.translate-select-model {
+  min-width: 160px;
+}
+
+/* 固定高度保证左右两框等高对齐 */
+.translate-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 20px;
+  flex: 1;
+  height: 320px;
+  min-height: 320px;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .translate-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+    min-height: 400px;
+  }
+}
+
+/* 左列：输入框 + 下方按钮组（居右） */
+.translate-left-col,
+.translate-right-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 10px;
+}
+
+.translate-left-col .translate-input-wrap,
+.translate-right-col .translate-output-wrap {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+.translate-half {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .translate-half {
+    height: 200px;
+    min-height: 200px;
+  }
+}
+
+/* 左右两列：外层同尺寸，内层用绝对定位填满相同 inset，保证输入框与输出框上下左右完全对齐 */
+.translate-input-wrap,
+.translate-output-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+.translate-input-wrap {
+  background: #fff;
+  overflow: hidden;
+}
+
+.translate-output-wrap {
+  background: #f9fafb;
+  overflow: hidden;
+}
+
+/* 左右内容区完全相同的矩形：距四边 14px 16px，绝对定位填满 */
+.translate-textarea,
+.translate-output {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  bottom: 14px;
+  left: 16px;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 翻译输入框：覆盖全局 textarea 的 max-height/min-height，否则会被 main.css 限制高度 */
+.translate-input-wrap .translate-textarea,
+#translateInput.translate-textarea {
+  border: none;
+  border-radius: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: none;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text, #111827);
+  display: block;
+  min-height: 0 !important;
+  max-height: none !important;
+  height: auto !important;
+}
+
+.translate-textarea::placeholder {
+  color: var(--muted, #9ca3af);
+}
+
+.translate-textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.translate-input-wrap:focus-within {
+  border-color: var(--brand, #0ea5e9);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.translate-output {
+  overflow: auto;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text, #111827);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.translate-output.placeholder {
+  color: var(--muted, #9ca3af);
+}
+
+.translate-output.loading {
+  color: var(--muted, #6b7280);
+}
+
+/* 左侧下方三按钮：跟随左边对话框、居右 */
+.translate-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.translate-actions .btn {
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.translate-actions .btn.primary.translate-btn-main {
+  padding: 10px 28px;
+}
+
+.translate-actions .btn.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============ 语言选择弹窗（更多...，自适应列数） ============ */
+.translate-lang-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.translate-lang-modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.translate-lang-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.translate-lang-modal-card {
+  position: relative;
+  width: min(900px, 96vw);
+  max-height: 85vh;
+  background: #fff;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.translate-lang-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+  flex-shrink: 0;
+}
+
+.translate-lang-modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text, #111827);
+}
+
+.translate-lang-modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--muted, #6b7280);
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.translate-lang-modal-close:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.translate-lang-modal-search-wrap {
+  padding: 0 20px 12px;
+  flex-shrink: 0;
+}
+
+.translate-lang-modal-search {
+  width: 100%;
+  padding: 10px 14px 10px 36px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 10px;
+  font-size: 14px;
+  background: #f9fafb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") no-repeat 12px center;
+  color: var(--text, #111827);
+  box-sizing: border-box;
+}
+
+.translate-lang-modal-search::placeholder {
+  color: var(--muted, #9ca3af);
+}
+
+.translate-lang-modal-search:focus {
+  outline: none;
+  border-color: var(--brand, #0ea5e9);
+  background-color: #fff;
+}
+
+.translate-lang-modal-body {
+  padding: 0 20px 20px;
+  overflow: auto;
+  flex: 1;
+}
+
+/* 自适应网格：根据容器宽度与设备自动分列，兼顾密度与可读性 */
+.translate-lang-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 6px 14px;
+}
+
+.translate-lang-item {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text, #111827);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.translate-lang-item:hover {
+  background: #f3f4f6;
+}
+
+/* 右侧下方复制按钮：居右 */
+.translate-output-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.translate-output-actions .btn {
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}

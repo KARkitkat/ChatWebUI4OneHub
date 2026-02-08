@@ -71,6 +71,16 @@ html[data-theme="dark"] .composer:focus-within {
 	box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
 }
 
+/* 普通对话输入框：深色下保证文字与占位符可见 */
+html[data-theme="dark"] .composer textarea,
+html[data-theme="dark"] .composer #msg {
+	color: var(--text);
+	background: transparent;
+}
+html[data-theme="dark"] .composer textarea::placeholder {
+	color: var(--muted2);
+}
+
 html[data-theme="dark"] .icon-btn {
 	background: var(--panel);
 	border-color: var(--line);
@@ -311,6 +321,22 @@ html[data-theme="dark"] .model-all-close {
 	color: var(--text);
 }
 
+html[data-theme="dark"] .model-all-search-wrap {
+	border-bottom-color: var(--line);
+}
+html[data-theme="dark"] .model-all-search {
+	background-color: var(--panel2);
+	border-color: var(--line);
+	color: var(--text);
+}
+html[data-theme="dark"] .model-all-search::placeholder {
+	color: var(--muted2);
+}
+html[data-theme="dark"] .model-all-search:focus {
+	background-color: var(--panel);
+	border-color: var(--brand);
+}
+
 html[data-theme="dark"] .model-all-tab {
 	background: var(--panel);
 	border-color: var(--line);
@@ -382,4 +408,101 @@ html[data-theme="dark"] .nested-overlay-card {
 
 html[data-theme="dark"] .nested-overlay-msg {
 	color: var(--text);
+}
+
+/* 文本翻译面板深色模式 */
+html[data-theme="dark"] .translate-back {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--muted);
+}
+html[data-theme="dark"] .translate-back:hover {
+	background: var(--panel2);
+	color: var(--text);
+}
+html[data-theme="dark"] .translate-select {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--text);
+}
+/* 翻译输入框容器 + 输入框本体 */
+html[data-theme="dark"] .translate-input-wrap {
+	background: var(--panel);
+	border-color: var(--line);
+}
+html[data-theme="dark"] .translate-input-wrap:focus-within {
+	border-color: var(--line);
+	box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+html[data-theme="dark"] .translate-textarea {
+	background: transparent;
+	border-color: transparent;
+	color: var(--text);
+}
+html[data-theme="dark"] .translate-textarea::placeholder {
+	color: var(--muted2);
+}
+html[data-theme="dark"] .translate-output-wrap {
+	background: var(--panel2);
+	border-color: var(--line);
+}
+html[data-theme="dark"] .translate-output {
+	color: var(--text);
+}
+html[data-theme="dark"] .translate-output.placeholder {
+	color: var(--muted2);
+}
+
+/* 深色模式：主按钮保持突出，与 ghost 按钮区分 */
+html[data-theme="dark"] .btn.primary {
+	background: linear-gradient(135deg, #2563eb, #0ea5e9);
+	border: none;
+	color: #fff;
+}
+html[data-theme="dark"] .btn.primary:hover {
+	filter: brightness(1.12);
+}
+html[data-theme="dark"] .btn.primary:disabled {
+	opacity: 0.5;
+}
+html[data-theme="dark"] .btn.danger {
+	background: linear-gradient(135deg, #dc2626, #ea580c);
+	border: none;
+	color: #fff;
+}
+html[data-theme="dark"] .btn.danger:hover {
+	filter: brightness(1.12);
+}
+
+html[data-theme="dark"] .translate-lang-modal-card {
+	background: var(--panel);
+	border-color: var(--line);
+}
+html[data-theme="dark"] .translate-lang-modal-header {
+	border-bottom-color: var(--line);
+}
+html[data-theme="dark"] .translate-lang-modal-title {
+	color: var(--text);
+}
+html[data-theme="dark"] .translate-lang-modal-close {
+	color: var(--muted);
+}
+html[data-theme="dark"] .translate-lang-modal-close:hover {
+	background: var(--panel2);
+	color: var(--text);
+}
+html[data-theme="dark"] .translate-lang-modal-search {
+	background-color: var(--panel2);
+	border-color: var(--line);
+	color: var(--text);
+}
+html[data-theme="dark"] .translate-lang-modal-search:focus {
+	background-color: var(--panel);
+	border-color: var(--line);
+}
+html[data-theme="dark"] .translate-lang-item {
+	color: var(--text);
+}
+html[data-theme="dark"] .translate-lang-item:hover {
+	background: var(--panel2);
 }
