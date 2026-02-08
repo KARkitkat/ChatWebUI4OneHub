@@ -530,6 +530,12 @@ async function generateAssistantResponse(userText, userContentOverride) {
             assistantText = mergedSynth;
           }
         }
+        if (typeof normalizeImageOutput === "function") {
+          const normalized = normalizeImageOutput(assistantText);
+          if (normalized !== assistantText) {
+            assistantText = normalized;
+          }
+        }
 
         const onlyGenerating = typeof isOnlyGeneratingProgress === "function" && isOnlyGeneratingProgress(assistantText);
         if (!hasAssistantOutput && assistantText.trim() !== "" && !onlyGenerating) {

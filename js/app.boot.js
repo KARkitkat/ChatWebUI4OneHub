@@ -151,9 +151,7 @@ function setTheme(next) {
 
 function toggleTheme() {
   setTheme(getTheme() === "dark" ? "light" : "dark");
-}
-
-function initTheme() {
+}function initTheme() {
   const saved = getTheme();
   setTheme(saved);
   const btn = document.getElementById("themeToggle");
@@ -166,4 +164,3 @@ initTheme();
 window.setTheme = setTheme;
 window.getTheme = getTheme;
 window.toggleTheme = toggleTheme;
-
