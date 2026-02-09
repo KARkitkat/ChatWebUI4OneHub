@@ -457,6 +457,152 @@ async function streamTranslateToElement(modelId, prompt, outputEl, signal) {
   return fullText;
 }
 
+/** 判断是否为“思考”行（需从展示中剔除）：空行、引用行、以 Thinking 开头的行。 */
+function isOptimizeThinkingLine(line) {
+  if (/^\s*$/.test(line)) return true;
+  if (/^\s*>\s?/.test(line)) return true;
+  if (/^\s*Thinking/i.test(line)) return true;
+  return false;
+}
+
+/** 是否为 Thinking 的前缀（流式时先收到 T、Th、Thinking 等，不展示）。 */
+function isThinkingPrefix(text) {
+  const t = String(text ?? "").trim();
+  if (!t) return true;
+  return "Thinking...".toLowerCase().startsWith(t.toLowerCase()) || /^\s*Thinking\.*\s*$/i.test(t);
+}
+
+/** 去掉“思考”块：开头的 Thinking...、引用行（> …）与 spinner 行，只保留正文。仅用于文本优化输出。 */
+function stripOptimizeThinkingBlock(raw) {
+  let s = String(raw ?? "");
+  if (typeof stripSpinnerLines === "function") s = stripSpinnerLines(s);
+  const lines = s.split("\n");
+  let i = 0;
+  while (i < lines.length) {
+    if (isOptimizeThinkingLine(lines[i])) { i++; continue; }
+    break;
+  }
+  let result = lines.slice(i).join("\n").replace(/^\n+/, "");
+  const trimmed = result.trim();
+  if (trimmed && isThinkingPrefix(trimmed)) return "";
+  return result;
+}
+
+/** 文本优化专用：流式请求，隐藏思考过程，仅显示“正在思考”+ 加载条，最终只显示正文 */
+async function streamOptimizeToElement(modelId, prompt, outputEl, signal) {
+  const model = String(modelId || "gpt-4").trim();
+  const systemMsg = {
+    role: "system",
+    content: "你是写作优化助手。请只输出优化后的文章，不要解释、不要加标题或额外说明。",
+  };
+  const body = {
+    model,
+    temperature: 0.3,
+    presence_penalty: 0,
+    frequency_penalty: 0,
+    messages: [systemMsg, { role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const resp = await fetch("https://api.topglobai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + apiToken,
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
+    body: JSON.stringify(body),
+    signal,
+  });
+
+  if (!resp.ok) {
+    let errText = "";
+    try { errText = await resp.text(); } catch (_) {}
+    throw new Error(`请求失败: ${resp.status} ${errText || resp.statusText}`);
+  }
+  if (!resp.body) throw new Error("浏览器不支持流式读取。");
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let fullText = "";
+  let thinkingInterval = null;
+  const thinkingStartTime = Date.now();
+
+  function buildOptimizeThinkingHtml(seconds) {
+    return (
+      '<div class="optimize-thinking-inner generating-placeholder">' +
+      '<div class="generating-progress" role="progressbar" aria-valuetext="正在思考">' +
+      '<div class="generating-progress-bar"></div></div>' +
+      '<div class="generating-hint">' +
+      '<span class="generating-text">正在思考</span> <span class="generating-time">(' + seconds + 's)</span>' +
+      '</div>' +
+      '<div class="generating-note">这可能需要数分钟（如果AI需要思考的话）</div></div>'
+    );
+  }
+
+  function showOptimizeThinking() {
+    if (!outputEl) return;
+    outputEl.classList.add("optimize-thinking", "loading");
+    outputEl.classList.remove("placeholder");
+    const elapsed = Math.floor((Date.now() - thinkingStartTime) / 1000);
+    outputEl.innerHTML = buildOptimizeThinkingHtml(elapsed);
+    if (!thinkingInterval) {
+      thinkingInterval = setInterval(() => {
+        if (!outputEl.classList.contains("optimize-thinking")) {
+          if (thinkingInterval) clearInterval(thinkingInterval);
+          return;
+        }
+        const sec = Math.floor((Date.now() - thinkingStartTime) / 1000);
+        const timeEl = outputEl.querySelector(".generating-time");
+        if (timeEl) timeEl.textContent = "(" + sec + "s)";
+      }, 1000);
+    }
+  }
+
+  function showOptimizeResult(displayText) {
+    if (thinkingInterval) {
+      clearInterval(thinkingInterval);
+      thinkingInterval = null;
+    }
+    if (!outputEl) return;
+    outputEl.classList.remove("optimize-thinking", "loading", "placeholder");
+    outputEl.textContent = displayText;
+  }
+
+  const parse = createSSEParser((data) => {
+    if (data === "[DONE]") return;
+    let json;
+    try { json = JSON.parse(data); } catch (_) { return; }
+    const delta = json?.choices?.[0]?.delta?.content ?? json?.choices?.[0]?.message?.content ?? "";
+    if (!delta) return;
+    fullText += delta;
+    const displayText = stripOptimizeThinkingBlock(fullText);
+    const inThinking = displayText.trim() === "" && fullText.trim() !== "";
+    if (inThinking) {
+      showOptimizeThinking();
+    } else {
+      showOptimizeResult(displayText);
+    }
+  });
+
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      parse(decoder.decode(value, { stream: true }));
+    }
+  } finally {
+    if (thinkingInterval) {
+      clearInterval(thinkingInterval);
+      thinkingInterval = null;
+    }
+  }
+
+  const finalDisplay = stripOptimizeThinkingBlock(fullText);
+  showOptimizeResult(finalDisplay);
+  return finalDisplay;
+}
+
 function buildGeneratingPlaceholderHtml(seconds, dotCount) {
   const dots = dotCount === 0 ? "." : dotCount === 1 ? ".." : "...";
   return (

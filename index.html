@@ -417,6 +417,104 @@
             </div>
           </div>
         </section>
+
+        <!-- 文本优化面板（不保存到数据库） -->
+        <section class="optimize-panel translate-panel" id="optimizePanel" aria-hidden="true" hidden>
+          <div class="translate-panel-inner">
+            <div class="translate-header">
+              <h2 class="translate-title">文本优化</h2>
+              <button type="button" class="translate-back" id="optimizeBackBtn" aria-label="返回">返回</button>
+            </div>
+            <div class="optimize-toolbar">
+              <div class="optimize-toolbar-row optimize-toolbar-row-model">
+                <label class="translate-label">优化模型</label>
+                <div class="translate-model-selects">
+                  <select id="optimizeModelGroup" class="translate-select" aria-label="模型大类">
+                    <option value="gpt">GPT</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="gemini">Gemini</option>
+                    <option value="claude">Claude</option>
+                    <option value="kimi">Kimi</option>
+                  </select>
+                  <select id="optimizeModel" class="translate-select translate-select-model" aria-label="模型小类"></select>
+                </div>
+              </div>
+            </div>
+            <div class="optimize-body">
+              <div class="optimize-left-col">
+                <div class="optimize-block optimize-article-wrap">
+                  <label class="optimize-block-label">需要优化的文章</label>
+                  <textarea id="optimizeArticle" class="optimize-textarea" placeholder="在此输入需要优化的文章…" spellcheck="false"></textarea>
+                </div>
+                <div class="optimize-block optimize-config">
+                  <div class="optimize-config-title">优化配置</div>
+                  <div class="optimize-config-row">
+                    <label class="optimize-config-label">文章类型</label>
+                    <select id="optimizeArticleType" class="translate-select">
+                      <option value="语句">语句</option>
+                      <option value="普通文章">普通文章</option>
+                      <option value="小说">小说</option>
+                      <option value="论文">论文</option>
+                      <option value="自我介绍">自我介绍</option>
+                      <option value="通知邮件">通知邮件</option>
+                      <option value="法律文书">法律文书</option>
+                      <option value="广告文案">广告文案</option>
+                      <option value="新闻稿件">新闻稿件</option>
+                      <option value="日记">日记</option>
+                    </select>
+                  </div>
+                  <div class="optimize-config-row">
+                    <label class="optimize-config-label">目标读者</label>
+                    <select id="optimizeReader" class="translate-select">
+                      <option value="一般读者">一般读者</option>
+                      <option value="用户">用户</option>
+                      <option value="领导">领导</option>
+                      <option value="下属">下属</option>
+                    </select>
+                  </div>
+                  <div class="optimize-config-row">
+                    <label class="optimize-config-label">写作风格</label>
+                    <select id="optimizeStyle" class="translate-select">
+                      <option value="标准">标准</option>
+                      <option value="口语">口语</option>
+                      <option value="专业">专业</option>
+                      <option value="幽默">幽默</option>
+                      <option value="热情">热情</option>
+                      <option value="礼貌">礼貌</option>
+                      <option value="简洁">简洁</option>
+                      <option value="优雅">优雅</option>
+                    </select>
+                  </div>
+                  <div class="optimize-config-row">
+                    <label class="optimize-config-label">优化类型</label>
+                    <select id="optimizeType" class="translate-select">
+                      <option value="文本润色">文本润色</option>
+                      <option value="文本改写">文本改写</option>
+                      <option value="二次创作">二次创作</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="optimize-block optimize-custom-wrap">
+                  <label class="optimize-block-label">自定义要求</label>
+                  <textarea id="optimizeCustom" class="optimize-textarea optimize-textarea-small" placeholder="在此处输入您的自定义优化要求" spellcheck="false"></textarea>
+                </div>
+                <div class="optimize-actions">
+                  <button type="button" class="btn primary translate-btn-main" id="optimizeBtn">优化</button>
+                  <button type="button" class="btn ghost" id="optimizeClearBtn">清空</button>
+                  <button type="button" class="btn ghost" id="optimizeCopyInputBtn" title="复制左侧内容">复制</button>
+                </div>
+              </div>
+              <div class="optimize-right-col">
+                <div class="optimize-output-wrap translate-half translate-output-wrap">
+                  <div id="optimizeOutput" class="translate-output placeholder" aria-live="polite">优化结果将显示在这里</div>
+                </div>
+                <div class="translate-output-actions">
+                  <button type="button" class="btn ghost" id="optimizeCopyOutputBtn" title="复制右侧内容">复制</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -468,6 +566,7 @@
     <script src="js/app.chat.js?v=105"></script>
     <script src="js/app.translate-langs.js?v=105"></script>
     <script src="js/app.translate.js?v=105"></script>
+    <script src="js/app.optimize.js?v=105"></script>
     <script src="js/app.search.js?v=105"></script>
     <script src="js/app.models.js?v=105"></script>
   </body>

@@ -229,9 +229,11 @@
   color: #111827;
 }
 
-/* ============ 文本翻译面板（Google 翻译风格，不保存到数据库） ============ */
+/* ============ 文本翻译 / 文本优化面板（不保存到数据库） ============ */
 .main.translate-mode .content,
-.main.translate-mode .composer-wrap {
+.main.translate-mode .composer-wrap,
+.main.optimize-mode .content,
+.main.optimize-mode .composer-wrap {
   display: none !important;
 }
 
@@ -245,7 +247,11 @@
   width: 100%;
 }
 
-.main.translate-mode .translate-panel {
+.main.translate-mode .translate-panel#translatePanel {
+  display: block;
+}
+
+.main.optimize-mode .optimize-panel {
   display: block;
 }
 
@@ -476,6 +482,14 @@
   color: var(--muted, #6b7280);
 }
 
+/* 文本优化：思考阶段仅显示“正在思考”+ 加载条，不展示思考内容 */
+.translate-output.optimize-thinking {
+  padding: 12px 0;
+}
+.translate-output.optimize-thinking .optimize-thinking-inner {
+  max-width: 320px;
+}
+
 /* 左侧下方三按钮：跟随左边对话框、居右 */
 .translate-actions {
   display: flex;
@@ -646,6 +660,134 @@
 }
 
 .translate-output-actions .btn {
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ============ 文本优化面板 ============ */
+.optimize-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+}
+
+.optimize-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  flex: 1;
+  min-height: 360px;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .optimize-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.optimize-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+.optimize-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.optimize-right-col .optimize-output-wrap {
+  flex: 1;
+  min-height: 200px;
+}
+
+.optimize-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optimize-block-label,
+.optimize-config-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted, #6b7280);
+}
+
+.optimize-config-title {
+  margin-bottom: 4px;
+}
+
+.optimize-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px 14px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  font-family: inherit;
+  background: #fff;
+  color: var(--text, #111827);
+  box-sizing: border-box;
+}
+
+.optimize-textarea-small {
+  min-height: 72px;
+}
+
+.optimize-textarea::placeholder {
+  color: var(--muted, #9ca3af);
+}
+
+.optimize-config {
+  padding: 12px 0;
+}
+
+.optimize-config-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.optimize-config-row:last-child {
+  margin-bottom: 0;
+}
+
+.optimize-config-label {
+  flex: 0 0 72px;
+  font-size: 13px;
+  color: var(--muted, #6b7280);
+}
+
+.optimize-config-row .translate-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.optimize-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.optimize-actions .btn {
   padding: 10px 20px;
   border-radius: 999px;
   font-weight: 600;

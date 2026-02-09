@@ -506,3 +506,13 @@ html[data-theme="dark"] .translate-lang-item {
 html[data-theme="dark"] .translate-lang-item:hover {
 	background: var(--panel2);
 }
+
+/* 文本优化面板深色模式 */
+html[data-theme="dark"] .optimize-textarea {
+	background: var(--panel);
+	border-color: var(--line);
+	color: var(--text);
+}
+html[data-theme="dark"] .optimize-textarea::placeholder {
+	color: var(--muted2);
+}

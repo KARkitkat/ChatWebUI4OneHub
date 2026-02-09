@@ -67,6 +67,7 @@ const sessionsGroupEl = sideGroups?.[sideGroups.length - 1] || null;
 const topbarEl = document.querySelector(".topbar");
 let newChatBtn = null;
 let isTranslateMode = false;
+let isOptimizeMode = false;
 let composerWrap = null;
 const promptTranslateBtn = document.querySelector('.side-item[data-prompt="translate"]');
 const promptOptimizeBtn = document.querySelector('.side-item[data-prompt="optimize"]');
@@ -586,6 +587,11 @@ function syncSideSelection() {
     return;
   }
 
+  if (isOptimizeMode && promptOptimizeBtn) {
+    promptOptimizeBtn.classList.add("is-active");
+    return;
+  }
+
   if (activeSideKind === "new" && newChatBtn) {
     newChatBtn.classList.add("is-active");
   }
@@ -637,11 +643,12 @@ function setActiveSideKind(kind, options = {}) {
 
 function syncTopbarVisibility() {
   if (!topbarEl) return;
-  const shouldShow = !isTranslateMode && activeSideKind !== "session";
+  const shouldShow = !isTranslateMode && !isOptimizeMode && activeSideKind !== "session";
   topbarEl.style.display = shouldShow ? "" : "none";
 }
 
 function enterTranslateMode() {
+  if (isOptimizeMode) exitOptimizeMode();
   isTranslateMode = true;
   document.querySelector(".main")?.classList.add("translate-mode");
   const panel = document.getElementById("translatePanel");
@@ -665,8 +672,35 @@ function exitTranslateMode() {
   syncTopbarVisibility();
 }
 
+function enterOptimizeMode() {
+  if (isTranslateMode) exitTranslateMode();
+  isOptimizeMode = true;
+  document.querySelector(".main")?.classList.add("optimize-mode");
+  const panel = document.getElementById("optimizePanel");
+  if (panel) {
+    panel.hidden = false;
+    panel.setAttribute("aria-hidden", "false");
+  }
+  syncSideSelection();
+  syncTopbarVisibility();
+}
+
+function exitOptimizeMode() {
+  isOptimizeMode = false;
+  document.querySelector(".main")?.classList.remove("optimize-mode");
+  const panel = document.getElementById("optimizePanel");
+  if (panel) {
+    panel.hidden = true;
+    panel.setAttribute("aria-hidden", "true");
+  }
+  syncSideSelection();
+  syncTopbarVisibility();
+}
+
 window.enterTranslateMode = enterTranslateMode;
 window.exitTranslateMode = exitTranslateMode;
+window.enterOptimizeMode = enterOptimizeMode;
+window.exitOptimizeMode = exitOptimizeMode;
 
 function stripPromptPrefix(text, key) {
   const prompt = PROMPT_TEXTS[key];
@@ -1125,6 +1159,7 @@ function renderSessionsList(sessions) {
       }
 
       if (isTranslateMode) exitTranslateMode();
+      if (isOptimizeMode) exitOptimizeMode();
       clearPromptSelection();
       setActiveSideKind("session");
       try {
@@ -1206,9 +1241,8 @@ newChatBtn = document.querySelector(".side-item.primary");
 newChatBtn?.addEventListener("click", () => {
   if (ta.disabled) return;
   if (window.isGenerating) return;
-  if (isTranslateMode) {
-    exitTranslateMode();
-  }
+  if (isTranslateMode) exitTranslateMode();
+  if (isOptimizeMode) exitOptimizeMode();
   clearPromptSelection();
   setActiveSideKind("new");
   startNewChat();
@@ -1228,10 +1262,7 @@ promptOptimizeBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
   if (window.isGenerating) return;
   if (isTranslateMode) exitTranslateMode();
-  if (activeSideKind === "session") {
-    startNewChat();
-  }
-  activatePrompt("optimize");
+  enterOptimizeMode();
   scheduleSidebarClose();
 });
 
@@ -1239,6 +1270,7 @@ promptDrawBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
   if (window.isGenerating) return;
   if (isTranslateMode) exitTranslateMode();
+  if (isOptimizeMode) exitOptimizeMode();
   if (activeSideKind === "session") {
     startNewChat();
   }
@@ -1250,6 +1282,7 @@ promptVideoBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
   if (window.isGenerating) return;
   if (isTranslateMode) exitTranslateMode();
+  if (isOptimizeMode) exitOptimizeMode();
   if (activeSideKind === "session") {
     startNewChat();
   }
@@ -1261,6 +1294,7 @@ promptAudioBtn?.addEventListener("click", (ev) => {
   ev.stopPropagation();
   if (window.isGenerating) return;
   if (isTranslateMode) exitTranslateMode();
+  if (isOptimizeMode) exitOptimizeMode();
   if (activeSideKind === "session") {
     startNewChat();
   }
