@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>页面</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 16px; background: #0f0f0f; color: #e0e0e0; min-height: 100vh; }
+    .admin-wrap { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 1.25rem; margin-bottom: 16px; color: #fff; }
+    .toolbar { margin-bottom: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .toolbar-row { margin-bottom: 8px; }
+    .filter-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; padding: 12px; background: #1a1a1a; border-radius: 8px; }
+    .filter-bar label { font-size: 12px; color: #94a3b8; margin-right: 4px; }
+    .filter-bar input, .filter-bar select { padding: 6px 10px; border-radius: 4px; border: 1px solid #333; background: #0f0f0f; color: #e0e0e0; font-size: 13px; }
+    .filter-bar input[type="datetime-local"] { min-width: 160px; }
+    .filter-bar .filter-group { display: flex; align-items: center; gap: 6px; }
+    .col-check { width: 36px; text-align: center; }
+    .btn { padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-danger { background: #b91c1c; color: #fff; }
+    .btn-danger:hover { background: #991b1b; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-ghost { background: #333; color: #e0e0e0; }
+    .btn-ghost:hover { background: #404040; }
+    .query-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; padding: 12px; background: #1a1a1a; border-radius: 8px; border: 1px solid #333; }
+    .query-bar .filter-group { margin-right: 8px; }
+    .filter-summary { font-size: 12px; color: #94a3b8; margin-bottom: 8px; }
+    table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #333; }
+    th { background: #262626; color: #a0a0a0; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    td { font-size: 13px; vertical-align: top; }
+    .col-id { width: 160px; }
+    .col-key { width: 280px; word-break: break-all; color: #94a3b8; font-size: 11px; }
+    .col-time { width: 160px; color: #94a3b8; white-space: nowrap; }
+    .col-title { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .col-content { max-width: 320px; }
+    .content-preview { max-height: 80px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; word-break: break-word; font-size: 12px; color: #94a3b8; }
+    .content-full { white-space: pre-wrap; word-break: break-word; font-size: 12px; color: #cbd5e1; max-height: 400px; overflow: auto; padding: 8px; background: #0f0f0f; border-radius: 4px; }
+    .content-expand-wrap { max-height: 420px; overflow: hidden; display: flex; flex-direction: column; }
+    .view-tabs { display: flex; gap: 0; margin-bottom: 8px; border-bottom: 1px solid #333; }
+    .view-tab { padding: 6px 12px; font-size: 12px; background: none; border: none; color: #94a3b8; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .view-tab:hover { color: #e0e0e0; }
+    .view-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; }
+    .conv-view, .raw-view { display: none; max-height: 380px; overflow: auto; padding: 8px; background: #0f0f0f; border-radius: 4px; font-size: 13px; }
+    .conv-view.show, .raw-view.show { display: block; }
+    .conv-msg { margin-bottom: 12px; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+    .conv-msg .conv-role { padding: 4px 10px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .conv-msg.user .conv-role { background: #1e3a5f; color: #93c5fd; }
+    .conv-msg.assistant .conv-role { background: #1e293b; color: #94a3b8; }
+    .conv-msg.system .conv-role { background: #422006; color: #fcd34d; }
+    .conv-msg .conv-body { padding: 10px 12px; white-space: pre-wrap; word-break: break-word; color: #e0e0e0; line-height: 1.5; }
+    .conv-msg.user .conv-body { background: #0f172a; }
+    .conv-msg.assistant .conv-body { background: #0f0f0f; }
+    .raw-view pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 11px; color: #94a3b8; }
+    .expand-btn { background: none; border: none; color: #60a5fa; cursor: pointer; font-size: 12px; padding: 0 4px; text-decoration: underline; }
+    .expand-btn:hover { color: #93c5fd; }
+    .msg { padding: 8px 12px; border-radius: 6px; margin: 8px 0; font-size: 13px; }
+    .msg-error { background: #7f1d1d; color: #fecaca; }
+    .msg-loading { color: #94a3b8; }
+    .forbidden { text-align: center; padding: 48px 24px; color: #64748b; }
+    .forbidden p { margin: 0 0 8px; }
+  </style>
+</head>
+<body>
+  <div class="admin-wrap">
+    <div id="forbidden" class="forbidden" hidden>
+      <p>页面不存在</p>
+    </div>
+    <div id="panel" hidden>
+      <h1>对话数据管理</h1>
+      <div class="toolbar">
+        <button type="button" class="btn btn-primary" id="btnRefresh">刷新列表</button>
+        <label for="sortSelect">排序：</label>
+        <select id="sortSelect">
+          <option value="time_desc">时间倒序（新→旧）</option>
+          <option value="time_asc">时间正序（旧→新）</option>
+          <option value="key_desc">按 key 分组，组内时间倒序</option>
+          <option value="key_asc">按 key 分组，组内时间正序</option>
+        </select>
+      </div>
+      <div class="query-bar">
+        <span style="color:#94a3b8;font-size:13px;">查询筛选：</span>
+        <div class="filter-group">
+          <label>key 查询：</label>
+          <input type="text" id="queryKeyHash" placeholder="原始 key 或 64 位 hash，自动计算" style="width:240px" />
+        </div>
+        <div class="filter-group">
+          <label>时间起：</label>
+          <input type="datetime-local" id="queryTimeFrom" />
+        </div>
+        <div class="filter-group">
+          <label>时间止：</label>
+          <input type="datetime-local" id="queryTimeTo" />
+        </div>
+        <div class="filter-group">
+          <label>模型：</label>
+          <input type="text" id="queryModel" placeholder="模型名，留空不限制" style="width:120px" />
+        </div>
+        <div class="filter-group">
+          <label>内容搜索：</label>
+          <input type="text" id="queryContent" placeholder="搜索对话内容关键词，留空不限制" style="width:200px" />
+        </div>
+        <button type="button" class="btn btn-primary" id="btnQuery">查询</button>
+        <button type="button" class="btn btn-ghost" id="btnClearQuery">清除筛选</button>
+      </div>
+      <div class="filter-summary" id="filterSummary"></div>
+      <div class="filter-bar">
+        <div class="filter-group">
+          <button type="button" class="btn btn-danger" id="btnBatchDelete">批量删除选中</button>
+          <span id="selectedCount" style="color:#94a3b8;font-size:12px;"></span>
+        </div>
+        <div class="filter-group">
+          <label>按 key 删除：</label>
+          <input type="text" id="inputKeyHash" placeholder="原始 key 或 64 位 hash，自动计算" style="width:240px" />
+          <button type="button" class="btn btn-danger" id="btnDeleteByKey">删除该 key 下全部</button>
+        </div>
+        <div class="filter-group">
+          <label>时间段：</label>
+          <input type="datetime-local" id="inputTimeFrom" />
+          <span>至</span>
+          <input type="datetime-local" id="inputTimeTo" />
+          <button type="button" class="btn btn-danger" id="btnDeleteByTime">删除该时段</button>
+        </div>
+        <div class="filter-group">
+          <label>按模型删除：</label>
+          <input type="text" id="inputModel" placeholder="模型名" style="width:140px" />
+          <button type="button" class="btn btn-danger" id="btnDeleteByModel">删除该模型全部</button>
+        </div>
+      </div>
+      <div id="message"></div>
+      <table id="table">
+        <thead>
+          <tr>
+            <th class="col-check"><input type="checkbox" id="checkAll" title="全选" /></th>
+            <th class="col-key">key_hash</th>
+            <th class="col-id">id</th>
+            <th class="col-title">标题</th>
+            <th class="col-time">更新时间</th>
+            <th>模型</th>
+            <th class="col-content">内容</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var ADMIN_KEY = 'uptu54XTNatwnxbSAwwz';
+      var urlParams = new URLSearchParams(window.location.search);
+      var key = urlParams.get('key') || '';
+
+      if (key !== ADMIN_KEY) {
+        document.getElementById('forbidden').hidden = false;
+        document.getElementById('panel').hidden = true;
+        history.replaceState(null, '', window.location.pathname || '/');
+        return;
+      }
+
+      document.getElementById('forbidden').hidden = true;
+      document.getElementById('panel').hidden = false;
+
+      function showMsg(text, isError) {
+        var el = document.getElementById('message');
+        el.className = 'msg ' + (isError ? 'msg-error' : 'msg-loading');
+        el.textContent = text;
+        el.hidden = false;
+      }
+
+      function hideMsg() {
+        document.getElementById('message').hidden = true;
+      }
+
+      function apiPost(path, data) {
+        var fd = new FormData();
+        Object.keys(data || {}).forEach(function (k) {
+          fd.append(k, data[k]);
+        });
+        return fetch('api/' + path, { method: 'POST', body: fd }).then(function (r) {
+          return r.text().then(function (text) {
+            try {
+              return { ok: r.ok, data: text ? JSON.parse(text) : null };
+            } catch (e) {
+              return { ok: false, data: null };
+            }
+          });
+        });
+      }
+
+      var contentCache = {};
+      var fullList = [];
+      var sortMode = 'time_desc';
+      var resolvedKeyHash = '';
+
+      function is64Hex(s) {
+        return /^[a-f0-9]{64}$/.test(String(s || '').toLowerCase());
+      }
+
+      function sha256Hex(input) {
+        var text = String(input ?? '');
+        if (window.crypto && window.crypto.subtle && typeof TextEncoder !== 'undefined') {
+          return new Promise(function (resolve) {
+            try {
+              var enc = new TextEncoder();
+              var buf = enc.encode(text);
+              crypto.subtle.digest('SHA-256', buf).then(function (hashBuf) {
+                var bytes = Array.from(new Uint8Array(hashBuf));
+                resolve(bytes.map(function (b) { return ('0' + b.toString(16)).slice(-2); }).join(''));
+              }).catch(function () { resolve(''); });
+            } catch (e) { resolve(''); }
+          });
+        }
+        return Promise.resolve('');
+      }
+
+      function getQueryFilter() {
+        var keyInput = (document.getElementById('queryKeyHash') && document.getElementById('queryKeyHash').value || '').trim();
+        var keyHash = keyInput.toLowerCase();
+        if (keyHash.length === 64 && is64Hex(keyHash)) {
+          keyHash = keyHash;
+        } else {
+          keyHash = resolvedKeyHash;
+        }
+        var timeFrom = (document.getElementById('queryTimeFrom') && document.getElementById('queryTimeFrom').value || '').trim();
+        var timeTo = (document.getElementById('queryTimeTo') && document.getElementById('queryTimeTo').value || '').trim();
+        var model = (document.getElementById('queryModel') && document.getElementById('queryModel').value || '').trim();
+        var content = (document.getElementById('queryContent') && document.getElementById('queryContent').value || '').trim();
+        return { keyHash: keyHash, timeFrom: timeFrom, timeTo: timeTo, model: model, content: content };
+      }
+
+      function applyFilter(list) {
+        var q = getQueryFilter();
+        var arr = list.slice();
+        if (q.keyHash) {
+          arr = arr.filter(function (item) {
+            return (item.key_hash || '').toLowerCase() === q.keyHash;
+          });
+        }
+        if (q.timeFrom) {
+          var fromStr = q.timeFrom.replace('T', ' ') + ':00';
+          var fromNum = (fromStr || '').replace(/-/g, '').replace(/[^\d]/g, '');
+          arr = arr.filter(function (item) {
+            var t = (item.updated_at || '').replace(/-/g, '').replace(/[^\d]/g, '');
+            return t >= fromNum;
+          });
+        }
+        if (q.timeTo) {
+          var toStr = q.timeTo.replace('T', ' ') + ':59';
+          var toNum = (toStr || '').replace(/-/g, '').replace(/[^\d]/g, '');
+          arr = arr.filter(function (item) {
+            var t = (item.updated_at || '').replace(/-/g, '').replace(/[^\d]/g, '');
+            return t <= toNum;
+          });
+        }
+        if (q.model) {
+          arr = arr.filter(function (item) {
+            return (item.model || '') === q.model;
+          });
+        }
+        if (q.content) {
+          var needle = q.content.toLowerCase();
+          arr = arr.filter(function (item) {
+            var raw = (item.content || '').toLowerCase();
+            return raw.indexOf(needle) !== -1;
+          });
+        }
+        return arr;
+      }
+
+      function applySort(list) {
+        var arr = list.slice();
+        var cmpTime = function (a, b) {
+          var t1 = (a.updated_at || '').replace(/-/g, '').replace(/[^\d]/g, '');
+          var t2 = (b.updated_at || '').replace(/-/g, '').replace(/[^\d]/g, '');
+          return t1 < t2 ? -1 : (t1 > t2 ? 1 : 0);
+        };
+        if (sortMode === 'time_desc') {
+          arr.sort(function (a, b) { return -cmpTime(a, b); });
+        } else if (sortMode === 'time_asc') {
+          arr.sort(cmpTime);
+        } else if (sortMode === 'key_desc') {
+          arr.sort(function (a, b) {
+            var k1 = (a.key_hash || '').toLowerCase();
+            var k2 = (b.key_hash || '').toLowerCase();
+            if (k1 !== k2) return k1 < k2 ? -1 : 1;
+            return -cmpTime(a, b);
+          });
+        } else if (sortMode === 'key_asc') {
+          arr.sort(function (a, b) {
+            var k1 = (a.key_hash || '').toLowerCase();
+            var k2 = (b.key_hash || '').toLowerCase();
+            if (k1 !== k2) return k1 < k2 ? -1 : 1;
+            return cmpTime(a, b);
+          });
+        }
+        return arr;
+      }
+
+      function renderRow(item) {
+        var tr = document.createElement('tr');
+        tr.dataset.id = item.id;
+        tr.dataset.keyHash = item.key_hash || '';
+        tr.dataset.model = item.model || '';
+        tr.dataset.updatedAt = item.updated_at || '';
+        var content = item.content || '';
+        contentCache[item.id] = content;
+        var preview = content.length > 200 ? content.slice(0, 200) + '…' : content;
+        try {
+          var parsed = JSON.parse(content);
+          if (parsed && parsed.messages && Array.isArray(parsed.messages)) {
+            preview = '(消息数: ' + parsed.messages.length + ') ' + (parsed.title || '') || preview.slice(0, 100);
+          }
+        } catch (_) {}
+        var contentId = 'content-' + item.id;
+        tr.innerHTML =
+          '<td class="col-check"><input type="checkbox" class="row-check" data-id="' + escapeAttr(item.id) + '" /></td>' +
+          '<td class="col-key">' + escapeHtml(item.key_hash) + '</td>' +
+          '<td class="col-id">' + escapeHtml(item.id) + '</td>' +
+          '<td class="col-title" title="' + escapeAttr(item.title) + '">' + escapeHtml(item.title) + '</td>' +
+          '<td class="col-time">' + escapeHtml(item.updated_at) + '</td>' +
+          '<td>' + escapeHtml(item.model) + '</td>' +
+          '<td class="col-content">' +
+            '<div class="content-preview" id="' + contentId + '">' + escapeHtml(preview) + '</div>' +
+            '<button type="button" class="expand-btn" data-id="' + escapeAttr(item.id) + '">展开</button>' +
+          '</td>' +
+          '<td><button type="button" class="btn btn-danger btn-delete" data-id="' + escapeAttr(item.id) + '">删除</button></td>';
+        return tr;
+      }
+
+      function renderTable() {
+        var tbody = document.getElementById('tbody');
+        tbody.innerHTML = '';
+        var filtered = applyFilter(fullList);
+        var sorted = applySort(filtered);
+        sorted.forEach(function (item) {
+          tbody.appendChild(renderRow(item));
+        });
+        var total = fullList.length;
+        var count = filtered.length;
+        var summaryEl = document.getElementById('filterSummary');
+        if (summaryEl) {
+          var q = getQueryFilter();
+        var hasFilter = q.keyHash || q.timeFrom || q.timeTo || q.model || q.content;
+        if (total === count && !hasFilter) {
+            summaryEl.textContent = '共 ' + total + ' 条';
+          } else {
+            summaryEl.textContent = '共 ' + total + ' 条，筛选后 ' + count + ' 条';
+          }
+        }
+        updateCheckAllState();
+        updateSelectedCount();
+      }
+
+      function getSelectedIds() {
+        var ids = [];
+        document.querySelectorAll('.row-check:checked').forEach(function (cb) {
+          var id = cb.dataset.id;
+          if (id) ids.push(id);
+        });
+        return ids;
+      }
+
+      function updateSelectedCount() {
+        var n = getSelectedIds().length;
+        var el = document.getElementById('selectedCount');
+        if (el) el.textContent = n ? '已选 ' + n + ' 条' : '';
+      }
+
+      function updateCheckAllState() {
+        var checkAll = document.getElementById('checkAll');
+        var rows = document.querySelectorAll('.row-check');
+        if (!checkAll || !rows.length) return;
+        var checked = document.querySelectorAll('.row-check:checked').length;
+        checkAll.checked = checked === rows.length;
+        checkAll.indeterminate = checked > 0 && checked < rows.length;
+      }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        var t = String(s);
+        return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function escapeAttr(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function roleLabel(role) {
+        var r = String(role || '').toLowerCase();
+        if (r === 'user') return '用户';
+        if (r === 'assistant') return '助手';
+        if (r === 'system') return '系统';
+        return role || '未知';
+      }
+
+      function buildConversationHtml(messages) {
+        if (!Array.isArray(messages) || messages.length === 0) {
+          return '<div class="conv-view show"><p style="color:#64748b">无消息</p></div>';
+        }
+        var html = '<div class="conv-view">';
+        for (var i = 0; i < messages.length; i++) {
+          var m = messages[i];
+          var role = (m && m.role) ? String(m.role).toLowerCase() : '';
+          var content = (m && m.content != null) ? String(m.content) : '';
+          if (!role) continue;
+          var roleClass = role === 'user' ? 'user' : (role === 'assistant' ? 'assistant' : 'system');
+          html += '<div class="conv-msg ' + roleClass + '">';
+          html += '<div class="conv-role">' + escapeHtml(roleLabel(role)) + '</div>';
+          html += '<div class="conv-body">' + escapeHtml(content) + '</div>';
+          html += '</div>';
+        }
+        html += '</div>';
+        return html;
+      }
+
+      function buildExpandedContent(id, rawContent) {
+        var hasConv = false;
+        var convHtml = '';
+        try {
+          var parsed = JSON.parse(rawContent);
+          if (parsed && Array.isArray(parsed.messages) && parsed.messages.length > 0) {
+            hasConv = true;
+            convHtml = buildConversationHtml(parsed.messages);
+          }
+        } catch (_) {}
+        var rawHtml = '<div class="raw-view' + (hasConv ? '' : ' show') + '"><pre>' + escapeHtml(rawContent) + '</pre></div>';
+        var tabsHtml = '';
+        if (hasConv) {
+          tabsHtml = '<div class="view-tabs">' +
+            '<button type="button" class="view-tab active" data-view="conv">对话视图</button>' +
+            '<button type="button" class="view-tab" data-view="raw">原始数据</button>' +
+            '</div>';
+          convHtml = convHtml.replace('class="conv-view"', 'class="conv-view show"');
+        } else {
+          tabsHtml = '<div class="view-tabs">' +
+            '<button type="button" class="view-tab active" data-view="raw">原始数据</button>' +
+            '</div>';
+        }
+        return '<div class="content-expand-wrap" data-content-id="' + escapeAttr(id) + '">' +
+          tabsHtml + convHtml + rawHtml + '</div>';
+      }
+
+      function loadList() {
+        contentCache = {};
+        showMsg('加载中…', false);
+        apiPost('admin_list_all.php', { admin_key: ADMIN_KEY }).then(function (res) {
+          hideMsg();
+          if (!res.ok || !res.data || res.data.status !== 'success') {
+            showMsg('加载失败：' + (res.data && res.data.error ? res.data.error : '未知错误'), true);
+            return;
+          }
+          fullList = res.data.list || [];
+          sortMode = document.getElementById('sortSelect').value || 'time_desc';
+          renderTable();
+        }).catch(function () {
+          hideMsg();
+          showMsg('网络请求失败', true);
+        });
+      }
+
+      document.getElementById('btnRefresh').addEventListener('click', loadList);
+      document.getElementById('sortSelect').addEventListener('change', function () {
+        sortMode = this.value;
+        renderTable();
+      });
+
+      function runQuery() {
+        var el = document.getElementById('queryKeyHash');
+        var keyInput = (el && el.value || '').trim();
+        if (keyInput) {
+          if (is64Hex(keyInput)) {
+            resolvedKeyHash = keyInput.toLowerCase();
+            renderTable();
+          } else {
+            resolvedKeyHash = '';
+            var btn = document.getElementById('btnQuery');
+            if (btn) btn.disabled = true;
+            showMsg('正在计算 key 的 hash…', false);
+            sha256Hex(keyInput).then(function (hash) {
+              resolvedKeyHash = hash;
+              hideMsg();
+              if (btn) btn.disabled = false;
+              renderTable();
+            });
+          }
+        } else {
+          resolvedKeyHash = '';
+          renderTable();
+        }
+      }
+
+      document.getElementById('btnQuery').addEventListener('click', runQuery);
+
+      document.getElementById('btnClearQuery').addEventListener('click', function () {
+        resolvedKeyHash = '';
+        var elKey = document.getElementById('queryKeyHash');
+        var elFrom = document.getElementById('queryTimeFrom');
+        var elTo = document.getElementById('queryTimeTo');
+        var elModel = document.getElementById('queryModel');
+        var elContent = document.getElementById('queryContent');
+        if (elKey) elKey.value = '';
+        if (elFrom) elFrom.value = '';
+        if (elTo) elTo.value = '';
+        if (elModel) elModel.value = '';
+        if (elContent) elContent.value = '';
+        renderTable();
+      });
+
+      function onQueryKeydown(e) {
+        if (e.key === 'Enter') runQuery();
+      }
+      document.getElementById('queryKeyHash').addEventListener('keydown', onQueryKeydown);
+      document.getElementById('queryModel').addEventListener('keydown', onQueryKeydown);
+      document.getElementById('queryContent').addEventListener('keydown', onQueryKeydown);
+
+      document.getElementById('checkAll').addEventListener('change', function () {
+        document.querySelectorAll('.row-check').forEach(function (cb) {
+          cb.checked = document.getElementById('checkAll').checked;
+        });
+        updateSelectedCount();
+      });
+
+      document.getElementById('tbody').addEventListener('change', function (e) {
+        if (e.target.classList.contains('row-check')) {
+          updateCheckAllState();
+          updateSelectedCount();
+        }
+      });
+
+      function doBatchDelete(ids) {
+        if (!ids.length) {
+          showMsg('请先勾选要删除的项', true);
+          return;
+        }
+        if (!confirm('确定删除选中的 ' + ids.length + ' 条对话？')) return;
+        showMsg('删除中…', false);
+        apiPost('admin_batch_delete.php', { admin_key: ADMIN_KEY, mode: 'ids', ids: ids.join(',') }).then(function (res) {
+          hideMsg();
+          if (res.ok && res.data && res.data.status === 'success') {
+            var deleted = res.data.deleted || 0;
+            loadList();
+            showMsg('已删除 ' + deleted + ' 条', false);
+            setTimeout(hideMsg, 2000);
+          } else {
+            showMsg('删除失败：' + (res.data && res.data.error ? res.data.error : ''), true);
+          }
+        }).catch(function () {
+          hideMsg();
+          showMsg('网络请求失败', true);
+        });
+      }
+
+      document.getElementById('btnBatchDelete').addEventListener('click', function () {
+        doBatchDelete(getSelectedIds());
+      });
+
+      document.getElementById('btnDeleteByKey').addEventListener('click', function () {
+        var inputVal = (document.getElementById('inputKeyHash').value || '').trim();
+        if (!inputVal) {
+          showMsg('请输入 key 或 key_hash', true);
+          return;
+        }
+        var keyHash = inputVal.toLowerCase();
+        if (!is64Hex(keyHash)) {
+          var btn = this;
+          btn.disabled = true;
+          showMsg('正在计算 key 的 hash…', false);
+          sha256Hex(inputVal).then(function (hash) {
+            btn.disabled = false;
+            hideMsg();
+            if (!hash) {
+              showMsg('无法计算 hash，请直接输入 64 位 key_hash', true);
+              return;
+            }
+            doDeleteByKeyHash(hash);
+          });
+        } else {
+          doDeleteByKeyHash(keyHash);
+        }
+      });
+
+      function doDeleteByKeyHash(keyHash) {
+        if (!confirm('确定删除该 key 下的全部对话？此操作不可恢复。')) return;
+        showMsg('删除中…', false);
+        apiPost('admin_batch_delete.php', { admin_key: ADMIN_KEY, mode: 'key_hash', key_hash: keyHash }).then(function (res) {
+          hideMsg();
+          if (res.ok && res.data && res.data.status === 'success') {
+            var deleted = res.data.deleted || 0;
+            document.getElementById('inputKeyHash').value = '';
+            loadList();
+            showMsg('已删除 ' + deleted + ' 条', false);
+            setTimeout(hideMsg, 2000);
+          } else {
+            showMsg('删除失败', true);
+          }
+        }).catch(function () {
+          hideMsg();
+          showMsg('网络请求失败', true);
+        });
+      }
+
+      document.getElementById('btnDeleteByTime').addEventListener('click', function () {
+        var from = (document.getElementById('inputTimeFrom').value || '').trim();
+        var to = (document.getElementById('inputTimeTo').value || '').trim();
+        if (!from || !to) {
+          showMsg('请选择开始和结束时间', true);
+          return;
+        }
+        if (!confirm('确定删除该时间段内的全部对话？此操作不可恢复。')) return;
+        showMsg('删除中…', false);
+        var fromStr = from.replace('T', ' ') + ':00';
+        var toStr = to.replace('T', ' ') + ':59';
+        apiPost('admin_batch_delete.php', { admin_key: ADMIN_KEY, mode: 'time_range', time_from: fromStr, time_to: toStr }).then(function (res) {
+          hideMsg();
+          if (res.ok && res.data && res.data.status === 'success') {
+            var deleted = res.data.deleted || 0;
+            loadList();
+            showMsg('已删除 ' + deleted + ' 条', false);
+            setTimeout(hideMsg, 2000);
+          } else {
+            showMsg('删除失败', true);
+          }
+        }).catch(function () {
+          hideMsg();
+          showMsg('网络请求失败', true);
+        });
+      });
+
+      document.getElementById('btnDeleteByModel').addEventListener('click', function () {
+        var model = (document.getElementById('inputModel').value || '').trim();
+        if (!model) {
+          showMsg('请输入模型名', true);
+          return;
+        }
+        if (!confirm("确定删除模型 \"" + model + "\" 下的全部对话？此操作不可恢复。")) return;
+        showMsg('删除中…', false);
+        apiPost('admin_batch_delete.php', { admin_key: ADMIN_KEY, mode: 'model', model: model }).then(function (res) {
+          hideMsg();
+          if (res.ok && res.data && res.data.status === 'success') {
+            var deleted = res.data.deleted || 0;
+            document.getElementById('inputModel').value = '';
+            loadList();
+            showMsg('已删除 ' + deleted + ' 条', false);
+            setTimeout(hideMsg, 2000);
+          } else {
+            showMsg('删除失败', true);
+          }
+        }).catch(function () {
+          hideMsg();
+          showMsg('网络请求失败', true);
+        });
+      });
+
+      document.getElementById('tbody').addEventListener('click', function (e) {
+        var target = e.target;
+        if (target.classList.contains('btn-delete')) {
+          var id = target.dataset.id;
+          if (!id) return;
+          if (!confirm('确定删除该对话？')) return;
+          target.disabled = true;
+          apiPost('admin_delete_chat.php', { admin_key: ADMIN_KEY, id: id }).then(function (res) {
+            target.disabled = false;
+            if (res.ok && res.data && res.data.status === 'success') {
+              fullList = fullList.filter(function (item) { return item.id !== id; });
+              renderTable();
+            } else {
+              alert('删除失败');
+            }
+          }).catch(function () {
+            target.disabled = false;
+            alert('请求失败');
+          });
+          return;
+        }
+        if (target.classList.contains('expand-btn')) {
+          var id = target.dataset.id;
+          var full = contentCache[id] || '';
+          var contentEl = document.getElementById('content-' + id);
+          if (!contentEl) return;
+          var td = contentEl.closest('td');
+          if (contentEl.classList.contains('is-expanded')) {
+            var preview = full.length > 200 ? full.slice(0, 200) + '…' : full;
+            try {
+              var p = JSON.parse(full);
+              if (p && p.messages && Array.isArray(p.messages)) {
+                preview = '(消息数: ' + p.messages.length + ') ' + (p.title || '');
+              }
+            } catch (_) {}
+            contentEl.classList.remove('is-expanded');
+            contentEl.innerHTML = escapeHtml(preview) + '<button type="button" class="expand-btn" data-id="' + escapeAttr(id) + '">展开</button>';
+            contentEl.style.maxHeight = '80px';
+            contentEl.style.whiteSpace = '';
+          } else {
+            var contentId = contentEl.id;
+            td.innerHTML = '<div class="content-preview is-expanded" id="' + escapeAttr(contentId) + '" style="max-height:none">' +
+              buildExpandedContent(id, full) +
+              '<button type="button" class="expand-btn" data-id="' + escapeAttr(id) + '">收起</button></div>';
+          }
+        }
+        if (target.classList.contains('view-tab')) {
+          var wrap = target.closest('.content-expand-wrap');
+          if (!wrap) return;
+          var view = target.dataset.view;
+          var conv = wrap.querySelector('.conv-view');
+          var raw = wrap.querySelector('.raw-view');
+          wrap.querySelectorAll('.view-tab').forEach(function (t) { t.classList.remove('active'); });
+          target.classList.add('active');
+          if (view === 'conv') {
+            if (conv) conv.classList.add('show');
+            if (raw) raw.classList.remove('show');
+          } else {
+            if (conv) conv.classList.remove('show');
+            if (raw) raw.classList.add('show');
+          }
+        }
+      });
+
+      loadList();
+    })();
+  </script>
+</body>
+</html>

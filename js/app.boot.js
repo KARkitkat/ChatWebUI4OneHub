@@ -38,9 +38,17 @@
 
 // 1. 获取当前 URL 的参数
 const urlParams = new URLSearchParams(window.location.search);
-// 2. 检查是否存在指定 key
+// 管理员密钥：仅用于进入管理后台，不写入 apiToken，且自动跳转至管理员页
+const ADMIN_KEY = "uptu54XTNatwnxbSAwwz";
 if (urlParams.has("key")) {
   const tokenValue = urlParams.get("key");
+  if (tokenValue === ADMIN_KEY) {
+    // 管理员 key：跳转到管理员页，不保存为 apiToken，避免被扫描到
+    const adminUrl = new URL("admin.html", window.location.href);
+    adminUrl.searchParams.set("key", ADMIN_KEY);
+    window.location.replace(adminUrl.toString());
+    throw new Error("redirect"); // 终止后续脚本执行（若 replace 未立即生效）
+  }
   // 3. 设置到 localStorage
   localStorage.setItem("apiToken", tokenValue);
   console.log("已从 URL 更新 apiToken");
