@@ -396,7 +396,7 @@ async function sendChatMessage(userText, userContentOverride, signal) {
   return resp.body;
 }
 
-// ============ 翻译专用：流式请求，不写入历史、不保存到数据库 ============
+// ============ 翻译专用：流式请求，隐藏思考过程，仅显示“正在思考”+ 加载条，最终只显示翻译正文 ============
 async function streamTranslateToElement(modelId, prompt, outputEl, signal) {
   const model = String(modelId || "gpt-4").trim();
   const systemMsg = {
@@ -433,28 +433,87 @@ async function streamTranslateToElement(modelId, prompt, outputEl, signal) {
   const reader = resp.body.getReader();
   const decoder = new TextDecoder("utf-8");
   let fullText = "";
+  let thinkingInterval = null;
+  const thinkingStartTime = Date.now();
+
+  function buildTranslateThinkingHtml(seconds) {
+    return (
+      '<div class="optimize-thinking-inner generating-placeholder">' +
+      '<div class="generating-progress" role="progressbar" aria-valuetext="正在思考">' +
+      '<div class="generating-progress-bar"></div></div>' +
+      '<div class="generating-hint">' +
+      '<span class="generating-text">正在思考</span> <span class="generating-time">(' + seconds + 's)</span>' +
+      '</div></div>'
+    );
+  }
+
+  function showTranslateThinking() {
+    if (!outputEl) return;
+    outputEl.classList.add("optimize-thinking", "loading");
+    outputEl.classList.remove("placeholder");
+    const elapsed = Math.floor((Date.now() - thinkingStartTime) / 1000);
+    const alreadyShowing = outputEl.classList.contains("optimize-thinking") && outputEl.querySelector(".generating-progress");
+    if (!alreadyShowing) {
+      outputEl.innerHTML = buildTranslateThinkingHtml(elapsed);
+    } else {
+      const timeEl = outputEl.querySelector(".generating-time");
+      if (timeEl) timeEl.textContent = "(" + elapsed + "s)";
+    }
+    if (!thinkingInterval) {
+      thinkingInterval = setInterval(() => {
+        if (!outputEl.classList.contains("optimize-thinking")) {
+          if (thinkingInterval) clearInterval(thinkingInterval);
+          return;
+        }
+        const sec = Math.floor((Date.now() - thinkingStartTime) / 1000);
+        const timeEl = outputEl.querySelector(".generating-time");
+        if (timeEl) timeEl.textContent = "(" + sec + "s)";
+      }, 1000);
+    }
+  }
+
+  function showTranslateResult(displayText) {
+    if (thinkingInterval) {
+      clearInterval(thinkingInterval);
+      thinkingInterval = null;
+    }
+    if (!outputEl) return;
+    outputEl.classList.remove("optimize-thinking", "loading", "placeholder");
+    outputEl.textContent = displayText;
+  }
 
   const parse = createSSEParser((data) => {
     if (data === "[DONE]") return;
     let json;
     try { json = JSON.parse(data); } catch (_) { return; }
     const delta = json?.choices?.[0]?.delta?.content ?? json?.choices?.[0]?.message?.content ?? "";
-    if (delta) {
-      fullText += delta;
-      if (outputEl) {
-        outputEl.textContent = fullText;
-        outputEl.classList.remove("placeholder", "loading");
-      }
+    if (!delta) return;
+    fullText += delta;
+    const displayText = stripOptimizeThinkingBlock(fullText);
+    const inThinking = displayText.trim() === "" && fullText.trim() !== "";
+    if (inThinking) {
+      showTranslateThinking();
+    } else {
+      showTranslateResult(displayText);
     }
   });
 
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    parse(decoder.decode(value, { stream: true }));
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      parse(decoder.decode(value, { stream: true }));
+    }
+  } finally {
+    if (thinkingInterval) {
+      clearInterval(thinkingInterval);
+      thinkingInterval = null;
+    }
   }
 
-  return fullText;
+  const finalDisplay = stripOptimizeThinkingBlock(fullText);
+  showTranslateResult(finalDisplay);
+  return finalDisplay;
 }
 
 /** 判断是否为“思考”行（需从展示中剔除）：空行、引用行、以 Thinking 开头的行。 */
@@ -535,8 +594,7 @@ async function streamOptimizeToElement(modelId, prompt, outputEl, signal) {
       '<div class="generating-progress-bar"></div></div>' +
       '<div class="generating-hint">' +
       '<span class="generating-text">正在思考</span> <span class="generating-time">(' + seconds + 's)</span>' +
-      '</div>' +
-      '<div class="generating-note">这可能需要数分钟（如果AI需要思考的话）</div></div>'
+      '</div></div>'
     );
   }
 
@@ -545,7 +603,13 @@ async function streamOptimizeToElement(modelId, prompt, outputEl, signal) {
     outputEl.classList.add("optimize-thinking", "loading");
     outputEl.classList.remove("placeholder");
     const elapsed = Math.floor((Date.now() - thinkingStartTime) / 1000);
-    outputEl.innerHTML = buildOptimizeThinkingHtml(elapsed);
+    const alreadyShowing = outputEl.classList.contains("optimize-thinking") && outputEl.querySelector(".generating-progress");
+    if (!alreadyShowing) {
+      outputEl.innerHTML = buildOptimizeThinkingHtml(elapsed);
+    } else {
+      const timeEl = outputEl.querySelector(".generating-time");
+      if (timeEl) timeEl.textContent = "(" + elapsed + "s)";
+    }
     if (!thinkingInterval) {
       thinkingInterval = setInterval(() => {
         if (!outputEl.classList.contains("optimize-thinking")) {

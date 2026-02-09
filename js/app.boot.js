@@ -158,9 +158,7 @@ function toggleTheme() {
   if (btn) {
     btn.addEventListener("click", toggleTheme);
   }
-}
-
-initTheme();
+}initTheme();
 window.setTheme = setTheme;
 window.getTheme = getTheme;
 window.toggleTheme = toggleTheme;

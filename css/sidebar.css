@@ -66,6 +66,16 @@
 	font-weight: 900;
 	letter-spacing: .2px;
 	font-size: 22px;
+	display: flex;
+	align-items: center;
+}
+
+.logo img {
+	display: block;
+	max-width: 100%;
+	width: clamp(72px, 28vw, 120px);
+	height: auto;
+	object-fit: contain;
 }
 
 .side-group {
@@ -316,6 +326,11 @@
 	background: #fff;
 	cursor: pointer;
 	transition: all var(--duration);
+}
+
+.mini-icons a.mini {
+	text-decoration: none;
+	color: inherit;
 }
 
 .mini-icons .mini:hover {
