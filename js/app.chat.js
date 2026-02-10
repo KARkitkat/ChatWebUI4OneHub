@@ -108,6 +108,7 @@ function interruptCurrentGeneration() {
   restoreLastUserInput();
   return true;
 }
+if (typeof window !== "undefined") window.interruptCurrentGeneration = interruptCurrentGeneration;
 
 function removeAssistantMessage(assistantMsg, assistantBubble) {
   if (assistantBubble) {

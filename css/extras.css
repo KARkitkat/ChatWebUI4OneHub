@@ -1266,49 +1266,115 @@ body.gallery-mode .composer-wrap .send:hover:not(:disabled) {
   flex-direction: column;
 }
 
-/* 正在生成视频/图片的占位卡片 */
+/* 正在生成：模糊遮罩 + 缓慢移动的蓝色圆，梦幻感 */
 .gallery-card-generating .gallery-generating-wrap {
   width: 100%;
   aspect-ratio: 16 / 9;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.6);
+  isolation: isolate;
 }
 
 .gallery-card-generating.gallery-card-image .gallery-generating-wrap {
   aspect-ratio: 16 / 10;
 }
 
-.gallery-generating-label {
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+.gallery-generating-circles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(40px);
+  -webkit-filter: blur(40px);
 }
 
+/* 遮罩：先靠圆点自身 blur 保证有模糊，再叠一层 backdrop 模糊 + 半透明 */
+.gallery-generating-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  backdrop-filter: blur(132px);
+  -webkit-backdrop-filter: blur(132px);
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.gallery-generating-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.85);
+  animation: gallery-float 6s ease-in-out infinite;
+}
+
+.gallery-generating-circle--1 { left: 10%; top: 20%; animation-delay: 0s; }
+.gallery-generating-circle--2 { left: 60%; top: 15%; animation-delay: -1s; animation-duration: 7s; }
+.gallery-generating-circle--3 { left: 25%; top: 55%; animation-delay: -2s; animation-duration: 5s; }
+.gallery-generating-circle--4 { left: 70%; top: 60%; animation-delay: -0.5s; animation-duration: 8s; }
+.gallery-generating-circle--5 { left: 45%; top: 35%; animation-delay: -3s; animation-duration: 5.5s; }
+.gallery-generating-circle--6 { left: 15%; top: 70%; animation-delay: -1.5s; animation-duration: 6.5s; }
+
+@keyframes gallery-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(8%, -12%) scale(1.05); }
+  50% { transform: translate(-10%, 6%) scale(0.95); }
+  75% { transform: translate(5%, 10%) scale(1.02); }
+}
+
+/* 视频生成中：卡片下方假进度条（2 分钟走满，前 3/4 匀速后 1/4 渐慢；5 分钟超时） */
 .gallery-generating-progress {
   width: 100%;
-  max-width: 200px;
+  padding: 0 0 12px;
+  box-sizing: border-box;
+}
+
+.gallery-generating-progress-track {
   height: 6px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
   overflow: hidden;
 }
 
 .gallery-generating-progress-bar {
   height: 100%;
-  width: 35%;
+  width: 0%;
+  border-radius: 3px;
   background: rgba(255, 255, 255, 0.7);
-  border-radius: 999px;
-  animation: gallery-generating-bar 1.2s ease-in-out infinite;
+  transition: width 0.1s linear;
 }
 
-@keyframes gallery-generating-bar {
-  0%, 100% { transform: translateX(-100%); }
-  50% { transform: translateX(250%); }
+.gallery-generating-progress.gallery-generating-progress--completing .gallery-generating-progress-bar {
+  transition: width 0.5s ease-out;
+}
+
+/* 生成完成后：媒体先显示，遮罩模糊慢慢归零并淡出（由 JS 在图片加载完成 1s 后加 --start 再开始淡化） */
+.gallery-reveal-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  backdrop-filter: blur(132px);
+  -webkit-backdrop-filter: blur(132px);
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.gallery-reveal-overlay.gallery-reveal-overlay--start {
+  animation: gallery-reveal-fade 1.8s ease-out 0s forwards;
+}
+
+@keyframes gallery-reveal-fade {
+  0% {
+    opacity: 1;
+    backdrop-filter: blur(132px);
+    -webkit-backdrop-filter: blur(132px);
+  }
+  100% {
+    opacity: 0;
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+  }
 }
 
 /* 生成失败错误卡片 */
@@ -1407,6 +1473,19 @@ body.gallery-mode .composer-wrap .send:hover:not(:disabled) {
 .gallery-card-actions .gallery-btn:hover {
   background: rgba(255, 255, 255, 0.18);
   border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.gallery-card-actions .gallery-btn-play,
+.gallery-card-actions .gallery-btn-view {
+  background: rgba(59, 130, 246, 0.6);
+  border-color: rgba(59, 130, 246, 0.7);
+}
+
+.gallery-card-actions .gallery-btn-play:hover,
+.gallery-card-actions .gallery-btn-view:hover {
+  background: rgba(59, 130, 246, 0.8);
+  border-color: rgba(96, 165, 250, 0.9);
   color: #fff;
 }
 
@@ -1520,6 +1599,21 @@ body.gallery-mode .composer-wrap .send:hover:not(:disabled) {
 }
 
 /* 图片卡片 */
+.gallery-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.gallery-image-wrap .gallery-card-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .gallery-card-image .gallery-card-media {
   cursor: pointer;
 }

@@ -174,7 +174,7 @@
     return items.filter(function (item) { return !deleted.has(getItemDeleteKey(item)); });
   }
 
-  /** 在操作区追加删除按钮 */
+  /** 在操作区追加删除按钮。若当前项为生成中且正在生成，先停止生成再删除。 */
   function appendDeleteButton(actions, item) {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -182,6 +182,9 @@
     btn.textContent = "删除";
     btn.setAttribute("aria-label", "删除");
     btn.addEventListener("click", function () {
+      if (item.generating && typeof window.interruptCurrentGeneration === "function" && window.isGenerating) {
+        window.interruptCurrentGeneration();
+      }
       addDeletedKey(getItemDeleteKey(item));
       if (typeof window.refreshGallery === "function") window.refreshGallery();
     });
@@ -192,6 +195,10 @@
   function groupItemsByDate(items) {
     return [{ dateLabel: "本次会话", items }];
   }
+
+  /** 已展示过的完成项 URL（页面加载时已有或已展示过遮罩淡出的），不再加模糊遮罩 */
+  let shownCompletedUrls = new Set();
+  let isFirstGalleryRender = true;
 
   function renderGallery() {
     galleryGrid.innerHTML = "";
@@ -204,6 +211,13 @@
     }
 
     galleryPlaceholder?.classList.add("hidden");
+
+    if (isFirstGalleryRender) {
+      for (const item of items) {
+        if (item.url) shownCompletedUrls.add(item.url);
+      }
+      isFirstGalleryRender = false;
+    }
 
     for (const group of groups) {
       if (!group.items || group.items.length === 0) continue;
@@ -226,9 +240,23 @@
         } else if (item.type === "error") {
           card = createErrorCard(item);
         } else if (item.type === "video") {
-          card = createVideoCard(item);
+          const showReveal = !!item.url && !shownCompletedUrls.has(item.url);
+          if (showReveal) {
+            card = createGeneratingCard(item, {
+              completing: true,
+              onBarComplete: function (c) {
+                const newCard = createVideoCard(item, true);
+                c.parentNode.replaceChild(newCard, c);
+                shownCompletedUrls.add(item.url);
+              }
+            });
+          } else {
+            card = createVideoCard(item, false);
+          }
         } else {
-          card = createImageCard(item);
+          const showReveal = !!item.url && !shownCompletedUrls.has(item.url);
+          card = createImageCard(item, showReveal);
+          if (showReveal) shownCompletedUrls.add(item.url);
         }
         if (card) cardsWrap.appendChild(card);
       }
@@ -299,25 +327,91 @@
     return card;
   }
 
-  function createGeneratingCard(item) {
+  var FAKE_PROGRESS_DURATION = 120;
+  var FAKE_PROGRESS_TIMEOUT = 300;
+  var COMPLETING_BAR_DURATION_MS = 500;
+
+  function createGeneratingCard(item, options) {
     const isVideo = item.type === "video";
+    const completing = options && options.completing;
     const card = document.createElement("div");
     card.className = "gallery-card gallery-card-generating " + (isVideo ? "gallery-card-video" : "gallery-card-image");
 
     const mediaWrap = document.createElement("div");
     mediaWrap.className = "gallery-generating-wrap";
-    const label = document.createElement("div");
-    label.className = "gallery-generating-label";
-    label.textContent = isVideo ? "正在生成视频" : "正在生成图片";
-    const progress = document.createElement("div");
-    progress.className = "gallery-generating-progress";
-    progress.setAttribute("role", "progressbar");
-    progress.setAttribute("aria-valuetext", label.textContent);
-    const bar = document.createElement("div");
-    bar.className = "gallery-generating-progress-bar";
-    progress.appendChild(bar);
-    mediaWrap.appendChild(label);
-    mediaWrap.appendChild(progress);
+    const circles = document.createElement("div");
+    circles.className = "gallery-generating-circles";
+    const sizes = [80, 144, 104, 176, 116, 132];
+    sizes.forEach(function (size, i) {
+      const circle = document.createElement("div");
+      circle.className = "gallery-generating-circle gallery-generating-circle--" + (i + 1);
+      circle.style.width = size + "px";
+      circle.style.height = size + "px";
+      circles.appendChild(circle);
+    });
+    const overlay = document.createElement("div");
+    overlay.className = "gallery-generating-overlay";
+    overlay.setAttribute("aria-hidden", "true");
+    mediaWrap.appendChild(circles);
+    mediaWrap.appendChild(overlay);
+
+    card.appendChild(mediaWrap);
+
+    if (isVideo) {
+      const progressWrap = document.createElement("div");
+      progressWrap.className = "gallery-generating-progress" + (completing ? " gallery-generating-progress--completing" : "");
+      const progressTrack = document.createElement("div");
+      progressTrack.className = "gallery-generating-progress-track";
+      const progressBar = document.createElement("div");
+      progressBar.className = "gallery-generating-progress-bar";
+      progressBar.setAttribute("role", "progressbar");
+      progressBar.setAttribute("aria-valuemin", "0");
+      progressBar.setAttribute("aria-valuemax", "100");
+      progressTrack.appendChild(progressBar);
+      progressWrap.appendChild(progressTrack);
+      card.appendChild(progressWrap);
+
+      function setProgress(pct) {
+        const v = Math.min(100, Math.max(0, pct));
+        progressBar.style.width = v + "%";
+        progressBar.setAttribute("aria-valuenow", Math.round(v));
+      }
+
+      if (completing) {
+        requestAnimationFrame(function () {
+          setProgress(100);
+        });
+        progressBar.addEventListener("transitionend", function onEnd() {
+          progressBar.removeEventListener("transitionend", onEnd);
+          if (options && typeof options.onBarComplete === "function") options.onBarComplete(card);
+        });
+      } else {
+        const startTime = Date.now();
+        const tick = function () {
+          const elapsed = (Date.now() - startTime) / 1000;
+          if (elapsed >= FAKE_PROGRESS_TIMEOUT) {
+            setProgress(100);
+            return;
+          }
+          let pct;
+          if (elapsed < FAKE_PROGRESS_DURATION * 0.75) {
+            pct = (elapsed / (FAKE_PROGRESS_DURATION * 0.75)) * 75;
+          } else if (elapsed < FAKE_PROGRESS_DURATION) {
+            const t = (elapsed - FAKE_PROGRESS_DURATION * 0.75) / (FAKE_PROGRESS_DURATION * 0.25);
+            const easeOut = 1 - (1 - t) * (1 - t);
+            pct = 75 + 25 * easeOut;
+          } else {
+            pct = 100;
+          }
+          setProgress(pct);
+        };
+        tick();
+        const intervalId = setInterval(function () {
+          tick();
+          if ((Date.now() - startTime) / 1000 >= FAKE_PROGRESS_TIMEOUT) clearInterval(intervalId);
+        }, 100);
+      }
+    }
 
     const info = document.createElement("div");
     info.className = "gallery-card-info";
@@ -326,12 +420,11 @@
     appendDeleteButton(actions, item);
     info.appendChild(actions);
     appendPromptRow(info, item.prompt, item.modelId, item.type);
-    card.appendChild(mediaWrap);
     card.appendChild(info);
     return card;
   }
 
-  function createVideoCard(item) {
+  function createVideoCard(item, showRevealOverlay) {
     const card = document.createElement("div");
     card.className = "gallery-card gallery-card-video";
 
@@ -344,6 +437,19 @@
     video.playsInline = true;
     video.preload = "metadata";
     videoWrap.appendChild(video);
+    if (showRevealOverlay) {
+      const revealOverlay = document.createElement("div");
+      revealOverlay.className = "gallery-reveal-overlay";
+      revealOverlay.setAttribute("aria-hidden", "true");
+      videoWrap.appendChild(revealOverlay);
+      function startRevealAfterLoad() {
+        setTimeout(function () {
+          revealOverlay.classList.add("gallery-reveal-overlay--start");
+        }, 1000);
+      }
+      if (video.readyState >= 2) startRevealAfterLoad();
+      else video.addEventListener("loadeddata", startRevealAfterLoad);
+    }
 
     const info = document.createElement("div");
     info.className = "gallery-card-info";
@@ -428,16 +534,32 @@
     document.body.appendChild(overlay);
   }
 
-  function createImageCard(item) {
+  function createImageCard(item, showRevealOverlay) {
     const card = document.createElement("div");
     card.className = "gallery-card gallery-card-image";
 
+    const mediaWrap = document.createElement("div");
+    mediaWrap.className = "gallery-image-wrap";
     const img = document.createElement("img");
     img.className = "gallery-card-media";
     img.src = item.url;
     img.alt = "";
     img.loading = "lazy";
-    card.appendChild(img);
+    mediaWrap.appendChild(img);
+    if (showRevealOverlay) {
+      const revealOverlay = document.createElement("div");
+      revealOverlay.className = "gallery-reveal-overlay";
+      revealOverlay.setAttribute("aria-hidden", "true");
+      mediaWrap.appendChild(revealOverlay);
+      function startRevealAfterLoad() {
+        setTimeout(function () {
+          revealOverlay.classList.add("gallery-reveal-overlay--start");
+        }, 1000);
+      }
+      if (img.complete) startRevealAfterLoad();
+      else img.addEventListener("load", startRevealAfterLoad);
+    }
+    card.appendChild(mediaWrap);
 
     const info = document.createElement("div");
     info.className = "gallery-card-info";
@@ -446,7 +568,7 @@
     actions.className = "gallery-card-actions";
     const viewBtn = document.createElement("button");
     viewBtn.type = "button";
-    viewBtn.className = "gallery-btn";
+    viewBtn.className = "gallery-btn gallery-btn-view";
     viewBtn.textContent = "查看";
     viewBtn.addEventListener("click", () => openImageLightbox(item.url));
     actions.appendChild(viewBtn);
