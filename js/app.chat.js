@@ -681,7 +681,13 @@ function buildGeneratingPlaceholderHtml(seconds, dotCount) {
 }
 
 async function generateAssistantResponse(userText, userContentOverride) {
-  const assistantMsg = { role: "assistant", content: "" };
+  const modelEl = document.getElementById("selected-model");
+  const model = (
+    (modelEl?.dataset?.modelId !== undefined && modelEl.dataset.modelId !== "")
+      ? modelEl.dataset.modelId
+      : (modelEl?.innerText || "gpt-4")
+  ).trim();
+  const assistantMsg = { role: "assistant", content: "", modelId: model };
   ensureMessageId(assistantMsg);
   chatHistory.push(assistantMsg);
   const assistantBubble = appendMessage("assistant", "", assistantMsg);
@@ -695,6 +701,10 @@ async function generateAssistantResponse(userText, userContentOverride) {
   assistantBubble.dataset.rawMd = "";
   ensureMessageActions(assistantBubble, "assistant");
   setSending(true);
+
+  try {
+    document.dispatchEvent(new CustomEvent("chat:history-updated"));
+  } catch (_) {}
 
   generatingPlaceholderInterval = setInterval(() => {
     if (!assistantBubble.closest(".msg-row") || !assistantBubble.classList.contains("is-typing")) {
@@ -801,13 +811,6 @@ async function generateAssistantResponse(userText, userContentOverride) {
             assistantText = mergedSynth;
           }
         }
-        if (typeof normalizeImageOutput === "function") {
-          const normalized = normalizeImageOutput(assistantText);
-          if (normalized !== assistantText) {
-            assistantText = normalized;
-          }
-        }
-
         const onlyGenerating = typeof isOnlyGeneratingProgress === "function" && isOnlyGeneratingProgress(assistantText);
         if (!hasAssistantOutput && assistantText.trim() !== "" && !onlyGenerating) {
           hasAssistantOutput = true;
@@ -857,6 +860,9 @@ async function generateAssistantResponse(userText, userContentOverride) {
     }
 
     await saveCurrentChatToServer();
+    try {
+      document.dispatchEvent(new CustomEvent("chat:history-updated"));
+    } catch (_) {}
   } catch (err) {
     if (isAbortError(err)) {
       aborted = true;

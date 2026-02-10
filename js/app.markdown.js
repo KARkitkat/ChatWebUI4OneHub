@@ -9,8 +9,7 @@ function renderMarkdown(mdText) {
       mangle: false,
     });
 
-    const normalized = normalizeLatexDelimiters(mdText || "");
-    const rawHtml = marked.parse(normalized);
+    const rawHtml = marked.parse(mdText || "");
     const htmlWithCodeClass = rawHtml.replace(
       /<pre><code(?![^>]*class=)/g,
       '<pre><code class="hljs"'
@@ -129,56 +128,19 @@ function isVideoUrl(url) {
   }
 }
 
-// 规范化图片输出：合并重复图片 URL，将「裸 URL + ![image](url) + 重复 URL」整理为每张图仅保留一个 ![](url)
-// 若内容为视频链接的图片语法 ![image](视频URL)，先改为纯 URL，避免以图片形式显示导致“损坏”图标
+// 疑似被截断的域名（如 pfst.cf2.po 实为 poecdn.net 前半段），不当作有效图片地址，避免 ERR_CONNECTION_CLOSED
+function isLikelyTruncatedUrl(url) {
+  try {
+    const host = new URL(String(url)).hostname.toLowerCase();
+    return /\.(po|ne|or|ec|dn)$/.test(host);
+  } catch (_) {
+    return true;
+  }
+}
+
+// 已关闭：不再修改 AI 原始输出，便于查看原始内容
 function normalizeImageOutput(input) {
-  let str = String(input ?? "");
-  // 先把「以图片形式出现的视频 URL」改为纯 URL，后续 injectVideoPlayers 会正确渲染为视频；空/无效的图片语法去掉，避免损坏图标
-  str = str.replace(/!\[[^\]]*\]\s*\(\s*([^)]*)\s*\)/gi, (match, url) => {
-    const u = (url || "").trim();
-    if (!u) return ""; // ![image]() 或 ![]() 等空地址 → 移除，避免显示损坏图片
-    if (!/^https?:\/\//i.test(u)) return ""; // 非 URL 的括号内容 → 移除
-    return isVideoUrl(u) ? u : match; // 视频 URL → 改为纯 URL，其余保留
-  });
-
-  const mdImageRe = /!\[[^\]]*\]\s*\(\s*(https?:\/\/[^)\s]+)\s*\)/gi;
-  const rawUrlRe = /https?:\/\/[^\s<>"')\]\]]+(?:\?[^\s<>"')\]\]]*)?/g;
-
-  const urlPositions = [];
-  let m;
-  while ((m = mdImageRe.exec(str)) !== null) {
-    const url = (m[1] || "").trim();
-    if (url && !isVideoUrl(url)) urlPositions.push({ url, start: m.index, end: m.index + m[0].length });
-  }
-  while ((m = rawUrlRe.exec(str)) !== null) {
-    let url = m[0].replace(/[.,;:!?)\]\]]+$/, "").trim();
-    if (!url || url.length < 10) continue;
-    if (isVideoUrl(url)) continue; // 视频链接不当作图片，避免 pfst/poecdn 等域名下的 /video/ 被误判为图片
-    const isImageLike =
-      /\/image\//i.test(url) ||
-      /\.(png|jpe?g|gif|webp|bmp)(\?|$)/i.test(url) ||
-      /poecdn|pfst|cdn.*img/i.test(url);
-    if (isImageLike) {
-      urlPositions.push({ url, start: m.index, end: m.index + m[0].length });
-    }
-  }
-  if (urlPositions.length === 0) return str;
-
-  urlPositions.sort((a, b) => a.start - b.start);
-
-  const seen = new Set();
-  const uniqueOrdered = [];
-  for (const { url } of urlPositions) {
-    const norm = url.replace(/[.,;:!?)\]\]]+$/, "").trim();
-    if (seen.has(norm)) continue;
-    seen.add(norm);
-    uniqueOrdered.push(norm);
-  }
-
-  const firstStart = urlPositions[0].start;
-  const lastEnd = urlPositions[urlPositions.length - 1].end;
-  const replacement = uniqueOrdered.map((u) => `![image](${u})`).join("\n\n");
-  return str.slice(0, firstStart) + replacement + str.slice(lastEnd);
+  return String(input ?? "");
 }
 
 // 合并视频生成进度行（多种格式只保留最后一条）：Generating. (Ns)、Generating.. (Ns)、Generating... (Ns)、Generating... (**Ns** elapsed)、Generating video (Ns elapsed) 等

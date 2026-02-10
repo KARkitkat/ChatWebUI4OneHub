@@ -796,3 +796,781 @@
   justify-content: center;
   text-align: center;
 }
+
+/* ============ 画廊面板（纯黑底 + 亚克力，新建绘图/创作视频时右侧显示） ============ */
+/* 全屏黑色：body、main、侧边栏 */
+body.gallery-mode {
+  background: #000;
+}
+
+.main.gallery-mode {
+  background: #000;
+}
+
+body.gallery-mode .sidebar {
+  background: #000;
+  border-right-color: rgba(255, 255, 255, 0.1);
+}
+
+body.gallery-mode .sidebar-scroll { color: rgba(255, 255, 255, 0.85); }
+body.gallery-mode .side-item { color: rgba(255, 255, 255, 0.85); }
+body.gallery-mode .side-item:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+body.gallery-mode .side-item.is-active { background: rgba(255, 255, 255, 0.15); color: #fff; }
+body.gallery-mode .side-item.primary { color: #fff; }
+body.gallery-mode .divider { background: rgba(255, 255, 255, 0.12); }
+/* 画廊下侧边栏底部（side-footer）深色 */
+body.gallery-mode .side-footer {
+  background: #000;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+body.gallery-mode .side-balance {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+body.gallery-mode .balance-label,
+body.gallery-mode .balance-value { color: rgba(255, 255, 255, 0.85); }
+body.gallery-mode .balance-upgrade {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.12));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+body.gallery-mode .balance-upgrade:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0.18));
+  color: #fff;
+}
+body.gallery-mode .mini-icons .mini {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.85);
+}
+body.gallery-mode .mini-icons .mini:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+body.gallery-mode .mini svg { stroke: rgba(255, 255, 255, 0.7); }
+body.gallery-mode .mini-icons .mini.mini-mobile .mini-qr-pop {
+  background: rgba(20, 20, 20, 0.98);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+body.gallery-mode .mini-icons .mini.mini-mobile .mini-qr-hint {
+  color: rgba(255, 255, 255, 0.75);
+}
+body.gallery-mode .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); }
+body.gallery-mode .sidebar-scroll { scrollbar-color: rgba(255, 255, 255, 0.25) transparent; }
+
+/* 主内容区隐藏 hello 与聊天列表，topbar 通过 fixed 移到底部，避免 overflow 裁剪 */
+.main.gallery-mode .content > .hello,
+.main.gallery-mode .content > .chat-list {
+  display: none !important;
+}
+
+.main.gallery-mode .content {
+  display: block;
+  padding: 0;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* 画廊下 pillbar 与输入框合并：topbar 透明，无背景 */
+.main.gallery-mode .composer-wrap > .topbar {
+  position: static !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  display: flex !important;
+  visibility: visible !important;
+  height: auto;
+  padding: 12px 14px 8px;
+  background: transparent !important;
+  border: none;
+  box-shadow: none;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  min-width: 0;
+  overflow: visible;
+}
+
+.main.gallery-mode .composer-wrap > .topbar .topbar-inner {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  overflow: visible;
+}
+
+/* pillbar 与输入框共用一个外框：composer 不再单独描边 */
+.main.gallery-mode .composer-wrap .composer {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  border-top: none;
+  background: transparent;
+}
+
+.main.gallery-mode .pillbar {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 6px;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.main.gallery-mode .pillbar::-webkit-scrollbar {
+  display: none;
+}
+
+.main.gallery-mode .pill {
+  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+}
+
+.main.gallery-mode .pill:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.main.gallery-mode .pill.active {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #fff;
+}
+
+.main.gallery-mode .pill .dot {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.main.gallery-mode .pill.active .dot {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 生成中禁用模型切换 pillbar（视频/绘图同理） */
+body.is-generating .pillbar,
+body.is-generating #model-pillbar {
+  pointer-events: none;
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* 画廊下隐藏 pillbar 的「全部」按钮 */
+body.gallery-mode .pillbar .pill-all {
+  display: none !important;
+}
+
+/* 画廊下 model-pop 弹层黑色适配 */
+body.gallery-mode .model-pop {
+  background: rgba(18, 18, 18, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+}
+
+body.gallery-mode .model-pop-list {
+  background: transparent;
+}
+
+body.gallery-mode .model-pop-item {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.gallery-mode .model-pop-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+body.gallery-mode .model-pop-item.active {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #fff;
+  border-color: transparent;
+}
+
+body.gallery-mode .model-pop-item .model-owner {
+  color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 画廊 pillbar 移动端（合并状态下，仍拉满输入框宽度） */
+@media (max-width: 1210px) {
+  .main.gallery-mode .composer-wrap > .topbar {
+    padding: 10px 12px 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main.gallery-mode .composer-wrap > .topbar {
+    padding: 8px 10px 6px;
+  }
+  .main.gallery-mode .pillbar {
+    padding: 5px;
+  }
+  .main.gallery-mode .pill {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+/* 画廊不需要搜索、附件按钮 */
+body.gallery-mode #searchBtn {
+  display: none !important;
+}
+body.gallery-mode #attachBtn {
+  display: none !important;
+}
+
+/* 画廊模式下底部输入区：topbar 区域完全透明，仅输入框区域有半透明背景 */
+.main.gallery-mode .composer-wrap {
+  background: linear-gradient(to bottom, transparent 0, transparent 72px, rgba(0, 0, 0, 0.55) 72px, rgba(0, 0, 0, 0.55) 100%);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 22px;
+  border-top: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+.main.gallery-mode .composer-wrap > .topbar,
+.main.gallery-mode .composer-wrap .composer {
+  pointer-events: auto;
+}
+
+.main.gallery-mode .model-chip,
+body.gallery-mode .model-chip {
+  display: none !important;
+}
+
+.main.gallery-mode .composer {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.main.gallery-mode .composer textarea {
+  color: #fff;
+  background: transparent;
+}
+
+.main.gallery-mode .composer textarea::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* 附件、上传图片等按钮深色适配 */
+.main.gallery-mode .icon-btn,
+body.gallery-mode .composer-wrap .icon-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.main.gallery-mode .icon-btn:hover,
+body.gallery-mode .composer-wrap .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+.main.gallery-mode .send,
+body.gallery-mode .composer-wrap .send {
+  color: #fff;
+}
+
+.main.gallery-mode .send:hover:not(:disabled),
+body.gallery-mode .composer-wrap .send:hover:not(:disabled) {
+  color: #fff;
+}
+
+.main.gallery-mode .hint {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.gallery-panel {
+  display: none;
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  width: 100%;
+  background: #000;
+  min-height: 100%;
+}
+
+.main.gallery-mode .gallery-panel {
+  display: block;
+  z-index: 0;
+}
+
+.gallery-panel-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 24px 18px 300px;
+}
+
+.gallery-header {
+  flex-shrink: 0;
+  margin-bottom: 20px;
+}
+
+.gallery-title {
+  font-family: "Roboto", sans-serif;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+/* 亚克力风格：返回按钮与卡片 */
+.gallery-back {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+}
+
+.gallery-back:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.gallery-body {
+  flex: 1;
+  min-height: 200px;
+}
+
+.gallery-placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 15px;
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.gallery-placeholder.hidden {
+  display: none;
+}
+
+.gallery-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.gallery-date-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gallery-date-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 4px 0;
+}
+
+.gallery-date-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 24px;
+}
+
+/* 手机端：单列、卡片占满可用宽度，避免显示不全 */
+@media (max-width: 600px) {
+  .gallery-panel-inner {
+    padding: 24px 18px 260px;
+  }
+  .gallery-body {
+    overflow-x: hidden;
+    padding: 0 8px;
+    box-sizing: border-box;
+  }
+  .gallery-grid {
+    min-width: 0;
+    gap: 20px;
+  }
+  .gallery-date-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0;
+    min-width: 0;
+  }
+  .gallery-card {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .gallery-card-media,
+  .gallery-card-video .gallery-video-wrap,
+  .gallery-card-generating .gallery-generating-wrap,
+  .gallery-card-error .gallery-error-wrap {
+    max-width: 100%;
+  }
+  .gallery-card-info {
+    padding: 10px 12px;
+    gap: 8px;
+    min-width: 0;
+  }
+  .gallery-card-actions {
+    gap: 8px;
+  }
+  .gallery-card-actions .gallery-btn {
+    padding: 6px 12px;
+    min-height: 34px;
+    font-size: 12px;
+  }
+  .gallery-card-prompt-row {
+    gap: 6px;
+  }
+  .gallery-model-tag {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+  .gallery-card-prompt {
+    font-size: 12px;
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (min-width: 901px) {
+  .gallery-date-cards {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  }
+}
+
+/* 画廊卡片：亚克力透明 */
+.gallery-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 正在生成视频/图片的占位卡片 */
+.gallery-card-generating .gallery-generating-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 24px;
+}
+
+.gallery-card-generating.gallery-card-image .gallery-generating-wrap {
+  aspect-ratio: 16 / 10;
+}
+
+.gallery-generating-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.gallery-generating-progress {
+  width: 100%;
+  max-width: 200px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.gallery-generating-progress-bar {
+  height: 100%;
+  width: 35%;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  animation: gallery-generating-bar 1.2s ease-in-out infinite;
+}
+
+@keyframes gallery-generating-bar {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(250%); }
+}
+
+/* 生成失败错误卡片 */
+.gallery-card-error .gallery-error-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(180, 50, 50, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+}
+
+.gallery-error-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(220, 80, 80, 0.9);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-error-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.gallery-error-message {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  line-height: 1.5;
+  max-height: 4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.gallery-card-media {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.gallery-card-video .gallery-card-media {
+  aspect-ratio: 16 / 9;
+}
+
+.gallery-card-info {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gallery-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gallery-card-actions .gallery-btn {
+  padding: 8px 14px;
+  min-height: 38px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.gallery-card-actions .gallery-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.gallery-card-actions .gallery-btn-delete:hover {
+  background: rgba(220, 80, 80, 0.25);
+  border-color: rgba(220, 80, 80, 0.4);
+  color: #fff;
+}
+
+/* 倍速与播放/下载按钮统一高度：与 .gallery-btn 一致 */
+.gallery-card-actions .gallery-speed-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  box-sizing: border-box;
+}
+
+.gallery-speed-wrap:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.gallery-speed-wrap .gallery-speed-select {
+  padding: 0 20px 0 0;
+  height: 22px;
+  line-height: 22px;
+  border: none;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.9)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+}
+
+.gallery-speed-wrap .gallery-speed-select option {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.gallery-speed-wrap .gallery-speed-select:hover {
+  background-color: rgba(35, 35, 35, 0.98);
+}
+
+.gallery-speed-wrap .gallery-speed-select:focus {
+  outline: none;
+}
+
+.gallery-card-prompt-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 模型 tag：标签样式，与操作按钮明显区分（非可点击按钮） */
+.gallery-model-tag {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(150, 210, 255, 0.95);
+  background: transparent;
+  border: 1px dashed rgba(150, 210, 255, 0.5);
+  cursor: default;
+  user-select: none;
+  letter-spacing: 0.02em;
+}
+
+.gallery-card-prompt {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 视频卡片：第一列视频，第二列播放/倍速/下载，第三列提示词 */
+.gallery-card-video .gallery-card-info {
+  flex-direction: column;
+}
+
+.gallery-card-video .gallery-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #111;
+}
+
+.gallery-card-video .gallery-video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.gallery-card-video .gallery-card-actions {
+  flex-shrink: 0;
+}
+
+/* 图片卡片 */
+.gallery-card-image .gallery-card-media {
+  cursor: pointer;
+}
+
+.gallery-card-image .gallery-card-info {
+  flex-direction: column;
+}
+
+/* 图片放大预览浮层 */
+.gallery-image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 24px;
+  box-sizing: border-box;
+  cursor: zoom-out;
+}
+
+.gallery-image-lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  cursor: default;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.gallery-image-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.gallery-image-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}

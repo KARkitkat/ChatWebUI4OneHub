@@ -14,6 +14,7 @@ const API_BASE = "api";
 const LEGACY_LOCAL_HISTORY_KEY = "chat_history_v1"; // 旧版本 localStorage 历史
 const ACTIVE_CHAT_ID_KEY = "active_chat_id_v1";
 const ACTIVE_SIDE_KIND_KEY = "active_side_kind_v1";
+const LAST_GALLERY_CHAT_ID_KEY = "last_gallery_chat_id_v1"; // 上次有内容的画廊会话，用于「新建会话后再开画廊」时恢复
 
 function normalizeSideKind(kind) {
   const k = String(kind || "").trim();
@@ -68,6 +69,8 @@ const topbarEl = document.querySelector(".topbar");
 let newChatBtn = null;
 let isTranslateMode = false;
 let isOptimizeMode = false;
+let isGalleryMode = false;
+let galleryPromptKey = ""; // "draw" | "video"
 let composerWrap = null;
 const promptTranslateBtn = document.querySelector('.side-item[data-prompt="translate"]');
 const promptOptimizeBtn = document.querySelector('.side-item[data-prompt="optimize"]');
@@ -78,13 +81,13 @@ const promptAudioBtn = document.querySelector('.side-item[data-prompt="audio"]')
 const PROMPT_TEXTS = {
   translate: "请将以下文本翻译成英文：\n",
   optimize: "请优化以下文本，使其更清晰、更流畅：\n",
-  draw: "创建一幅图片：",
-  video: "创作一段视频：",
+  draw: "", // 新建绘图不自动添加前缀
+  video: "", // 创作视频不添加前缀文字
   audio: "", // 创作音频不添加前缀文字
 };
 
 const DRAW_AUTO_MODEL_ID = "nano-banana";
-const VIDEO_AUTO_MODEL_ID = "sora-2";
+const VIDEO_AUTO_MODEL_ID = "sora";
 const AUDIO_AUTO_MODEL_ID = "elevenlabs-v3";
 const DRAW_MODEL_STORAGE_KEY =
   typeof MODEL_STORAGE_KEY === "string" ? MODEL_STORAGE_KEY : "selected_model_v1";
@@ -643,12 +646,14 @@ function setActiveSideKind(kind, options = {}) {
 
 function syncTopbarVisibility() {
   if (!topbarEl) return;
-  const shouldShow = !isTranslateMode && !isOptimizeMode && activeSideKind !== "session";
+  /* 画廊模式下也显示 topbar（模型切换 pillbar），会通过 CSS 移到底部 */
+  const shouldShow = (!isTranslateMode && !isOptimizeMode && activeSideKind !== "session") || isGalleryMode;
   topbarEl.style.display = shouldShow ? "" : "none";
 }
 
 function enterTranslateMode() {
   if (isOptimizeMode) exitOptimizeMode();
+  if (isGalleryMode) exitGalleryMode();
   isTranslateMode = true;
   document.querySelector(".main")?.classList.add("translate-mode");
   const panel = document.getElementById("translatePanel");
@@ -674,6 +679,7 @@ function exitTranslateMode() {
 
 function enterOptimizeMode() {
   if (isTranslateMode) exitTranslateMode();
+  if (isGalleryMode) exitGalleryMode();
   isOptimizeMode = true;
   document.querySelector(".main")?.classList.add("optimize-mode");
   const panel = document.getElementById("optimizePanel");
@@ -697,10 +703,79 @@ function exitOptimizeMode() {
   syncTopbarVisibility();
 }
 
+async function enterGalleryMode(promptKey) {
+  if (isTranslateMode) exitTranslateMode();
+  if (isOptimizeMode) exitOptimizeMode();
+  isGalleryMode = true;
+  galleryPromptKey = promptKey === "video" ? "video" : "draw";
+  document.querySelector(".main")?.classList.add("gallery-mode");
+  document.body.classList.add("gallery-mode");
+  const wrap = document.querySelector(".composer-wrap");
+  if (topbarEl && wrap) {
+    wrap.insertBefore(topbarEl, wrap.firstChild);
+  }
+  const panel = document.getElementById("galleryPanel");
+  if (panel) {
+    panel.hidden = false;
+    panel.setAttribute("aria-hidden", "false");
+  }
+  syncSideSelection();
+  syncTopbarVisibility();
+  const hasCurrentContent = currentChatId && chatHistory && chatHistory.length > 0;
+  if (!hasCurrentContent && typeof loadChatFromServer === "function") {
+    const lastId = (function () {
+      try {
+        return localStorage.getItem(LAST_GALLERY_CHAT_ID_KEY) || "";
+      } catch (_) {
+        return "";
+      }
+    })();
+    if (lastId && lastId !== currentChatId) {
+      try {
+        await loadChatFromServer(lastId);
+        await refreshSessionsList();
+        syncSideSelection();
+      } catch (_) {}
+    }
+  } else if (currentChatId && typeof loadChatFromServer === "function") {
+    try {
+      await loadChatFromServer(currentChatId);
+    } catch (_) {}
+  }
+  if (typeof window.refreshGallery === "function") window.refreshGallery();
+}
+
+function exitGalleryMode() {
+  if (currentChatId && chatHistory && chatHistory.length > 0) {
+    try {
+      localStorage.setItem(LAST_GALLERY_CHAT_ID_KEY, currentChatId);
+    } catch (_) {}
+  }
+  isGalleryMode = false;
+  galleryPromptKey = "";
+  document.querySelector(".main")?.classList.remove("gallery-mode");
+  document.body.classList.remove("gallery-mode");
+  const contentEl = document.querySelector(".content");
+  if (topbarEl && contentEl) {
+    contentEl.appendChild(topbarEl);
+  }
+  const panel = document.getElementById("galleryPanel");
+  if (panel) {
+    panel.hidden = true;
+    panel.setAttribute("aria-hidden", "true");
+  }
+  syncSideSelection();
+  syncTopbarVisibility();
+}
+
 window.enterTranslateMode = enterTranslateMode;
 window.exitTranslateMode = exitTranslateMode;
 window.enterOptimizeMode = enterOptimizeMode;
 window.exitOptimizeMode = exitOptimizeMode;
+window.enterGalleryMode = enterGalleryMode;
+window.exitGalleryMode = exitGalleryMode;
+window.isGalleryMode = function () { return isGalleryMode; };
+window.galleryPromptKey = function () { return galleryPromptKey; };
 
 function stripPromptPrefix(text, key) {
   const prompt = PROMPT_TEXTS[key];
@@ -813,7 +888,7 @@ async function deleteSelectedSessions() {
 
 function activatePrompt(key) {
   const prompt = PROMPT_TEXTS[key];
-  if (prompt === undefined || (prompt === "" && key !== "audio")) return;
+  if (prompt === undefined || (prompt === "" && key !== "audio" && key !== "video" && key !== "draw")) return;
 
   // 切换预设时清空输入框再填入当前预设内容，避免残留上一项文字
   const presetText = key === "audio" ? "" : (prompt || "");
@@ -869,8 +944,8 @@ async function saveCurrentChatToServer() {
 
   // 如果是新会话第一次保存，刷新侧边栏列表
   if (!before && currentChatId) {
-    // 模板（翻译/优化/绘图）首次生成会话后，自动切到“历史记录”条目，避免一直停留在模板选中态
-    if (activeSideKind === "prompt" && activePromptKey) {
+    // 画廊模式下不切到“历史记录”，保持 prompt + 当前模型栏（视频/绘图），避免 pillbar 变成默认
+    if (!isGalleryMode && activeSideKind === "prompt" && activePromptKey) {
       const keepDrawModel = activePromptKey === "draw";
       const keepVideoModel = activePromptKey === "video";
       const keepAudioModel = activePromptKey === "audio";
@@ -947,6 +1022,9 @@ function renderHistoryToUI() {
     requestAnimationFrame(scrollChatToBottom);
   });
   setTimeout(scrollChatToBottom, 80);
+  if (typeof window.isGalleryMode === "function" && window.isGalleryMode() && typeof window.refreshGallery === "function") {
+    window.refreshGallery();
+  }
 }
 
 async function promptRenameSession(id, titleText, short) {
@@ -1160,6 +1238,7 @@ function renderSessionsList(sessions) {
 
       if (isTranslateMode) exitTranslateMode();
       if (isOptimizeMode) exitOptimizeMode();
+      if (isGalleryMode) exitGalleryMode();
       clearPromptSelection();
       setActiveSideKind("session");
       try {
@@ -1243,6 +1322,7 @@ newChatBtn?.addEventListener("click", () => {
   if (window.isGenerating) return;
   if (isTranslateMode) exitTranslateMode();
   if (isOptimizeMode) exitOptimizeMode();
+  if (isGalleryMode) exitGalleryMode();
   clearPromptSelection();
   setActiveSideKind("new");
   startNewChat();
@@ -1275,6 +1355,7 @@ promptDrawBtn?.addEventListener("click", (ev) => {
     startNewChat();
   }
   activatePrompt("draw");
+  enterGalleryMode("draw");
   scheduleSidebarClose();
 });
 
@@ -1287,6 +1368,7 @@ promptVideoBtn?.addEventListener("click", (ev) => {
     startNewChat();
   }
   activatePrompt("video");
+  enterGalleryMode("video");
   scheduleSidebarClose();
 });
 
@@ -1295,6 +1377,7 @@ promptAudioBtn?.addEventListener("click", (ev) => {
   if (window.isGenerating) return;
   if (isTranslateMode) exitTranslateMode();
   if (isOptimizeMode) exitOptimizeMode();
+  if (isGalleryMode) exitGalleryMode();
   if (activeSideKind === "session") {
     startNewChat();
   }

@@ -24,6 +24,9 @@
       id="hljs-style"
     />
     <link rel="stylesheet" href="css/theme-dark.css?v=105" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   </head>
 
   <body>
@@ -515,6 +518,20 @@
             </div>
           </div>
         </section>
+
+        <!-- 画廊面板（新建绘图 / 创作视频 时右侧显示，纯黑底 + 亚克力） -->
+        <section class="gallery-panel translate-panel" id="galleryPanel" aria-hidden="true" hidden>
+          <div class="gallery-panel-inner">
+            <div class="gallery-header translate-header">
+              <h2 class="gallery-title translate-title">Gallery</h2>
+              <button type="button" class="gallery-back translate-back" id="galleryBackBtn" aria-label="返回">返回</button>
+            </div>
+            <div class="gallery-body" id="galleryBody">
+              <div class="gallery-placeholder" id="galleryPlaceholder">生成的图片与视频将按时间显示在这里</div>
+              <div class="gallery-grid" id="galleryGrid" aria-label="画廊列表"></div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -567,6 +584,7 @@
     <script src="js/app.translate-langs.js?v=105"></script>
     <script src="js/app.translate.js?v=105"></script>
     <script src="js/app.optimize.js?v=105"></script>
+    <script src="js/app.gallery.js?v=105"></script>
     <script src="js/app.search.js?v=105"></script>
     <script src="js/app.models.js?v=105"></script>
   </body>
