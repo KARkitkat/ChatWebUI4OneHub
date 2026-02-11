@@ -84,37 +84,45 @@ function mergeGeneratingImageProgress(input) {
     if (re.lastIndex === m.index) re.lastIndex++;
   }
 
-  if (matches.length <= 1) return text;
+  let out;
+  if (matches.length <= 1) {
+    out = text;
+  } else {
+    out = "";
+    let cursor = 0;
+    let i = 0;
 
-  let out = "";
-  let cursor = 0;
-  let i = 0;
+    while (i < matches.length) {
+      const start = matches[i].start;
+      out += text.slice(cursor, start);
 
-  while (i < matches.length) {
-    const start = matches[i].start;
-    out += text.slice(cursor, start);
+      let j = i;
+      let lastVal = matches[j].value;
+      let seqEnd = matches[j].end;
 
-    let j = i;
-    let lastVal = matches[i].value;
-    let seqEnd = matches[i].end;
-
-    while (j + 1 < matches.length) {
-      const gap = text.slice(matches[j].end, matches[j + 1].start);
-      if (/^\s*$/.test(gap)) {
-        j++;
-        lastVal = matches[j].value;
-        seqEnd = matches[j].end;
-        continue;
+      while (j + 1 < matches.length) {
+        const gap = text.slice(matches[j].end, matches[j + 1].start);
+        if (/^\s*$/.test(gap)) {
+          j++;
+          lastVal = matches[j].value;
+          seqEnd = matches[j].end;
+          continue;
+        }
+        break;
       }
-      break;
+
+      out += lastVal;
+      cursor = seqEnd;
+      i = j + 1;
     }
 
-    out += lastVal;
-    cursor = seqEnd;
-    i = j + 1;
+    out += text.slice(cursor);
   }
 
-  out += text.slice(cursor);
+  // 完全移除进度行，避免 nano-banana 等绘图模型在最终内容中残留 "Generating image (Ns elapsed)"
+  if (matches.length >= 1) {
+    out = out.replace(/\s*Generating image \(\d+s elapsed\)\s*/gi, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  }
   return out;
 }
 

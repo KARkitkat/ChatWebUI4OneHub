@@ -348,7 +348,12 @@ async function sendChatMessage(userText, userContentOverride, signal) {
   ).trim();
 
   const systemMsg = buildSystemMessage(model);
-  const historyForSend = trimHistory(chatHistory);
+  let historyForSend = trimHistory(chatHistory);
+  const galleryKey = typeof window.galleryPromptKey === "function" ? window.galleryPromptKey() : "";
+  // 新建绘图 + nano-banana 时不带历史，每次仅发当前轮，避免后端返回过期/错误图片 URL（poecdn 等无法加载）
+  if (String(model).toLowerCase() === "nano-banana" && galleryKey === "draw") {
+    historyForSend = [];
+  }
 
   // 允许传 Poe content[]，否则回退纯文本
   const userContent = userContentOverride ?? userText;
