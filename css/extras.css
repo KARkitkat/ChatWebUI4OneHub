@@ -812,6 +812,13 @@ body.gallery-mode .sidebar {
   border-right-color: rgba(255, 255, 255, 0.1);
 }
 
+/* 小屏 gallery 下侧边栏层级高于输入框，避免被 .composer-wrap 覆盖 */
+@media (max-width: 1210px) {
+  body.gallery-mode .sidebar {
+    z-index: 40;
+  }
+}
+
 body.gallery-mode .sidebar-scroll { color: rgba(255, 255, 255, 0.85); }
 body.gallery-mode .side-item { color: rgba(255, 255, 255, 0.85); }
 body.gallery-mode .side-item:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
@@ -1044,6 +1051,13 @@ body.gallery-mode #attachBtn {
   gap: 0;
   z-index: 30;
   pointer-events: auto;
+}
+
+/* 小屏下 gallery 输入框层级低于侧边栏（.sidebar z-index:28），避免拉出时覆盖侧边栏；必须写在本块之后才能覆盖上面的 z-index:30 */
+@media (max-width: 1210px) {
+  .main.gallery-mode .composer-wrap {
+    z-index: 20;
+  }
 }
 
 .main.gallery-mode .composer-wrap > .topbar,
