@@ -73,7 +73,7 @@
 .logo img {
 	display: block;
 	max-width: 100%;
-	width: clamp(72px, 28vw, 120px);
+	width: clamp(54px, 21vw, 90px);
 	height: auto;
 	object-fit: contain;
 }
