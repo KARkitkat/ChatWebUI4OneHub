@@ -64,6 +64,7 @@ body {
 	box-shadow: var(--shadow2);
 	z-index: 30;
 	cursor: pointer;
+	opacity: 0.7;
 	transition: transform var(--duration), box-shadow var(--duration);
 }
 

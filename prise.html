@@ -104,7 +104,10 @@
         .billing-tabs {
             display: flex;
             justify-content: center;
+            align-items: center;
+            gap: 16px;
             margin-bottom: 40px;
+            flex-wrap: wrap;
         }
 
         .tabs-inner {
@@ -146,6 +149,117 @@
             font-size: 12px;
             margin-left: 6px;
             opacity: 0.9;
+        }
+
+        /* 联系客服按钮 */
+        .contact-service-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            background: #fff;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s;
+        }
+        .contact-service-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .contact-service-btn .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+            animation: pulse-online 2s ease-in-out infinite;
+        }
+        @keyframes pulse-online {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* 客服弹窗 */
+        .contact-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .contact-modal-overlay.visible {
+            display: flex;
+        }
+        .contact-modal {
+            background: #fff;
+            border-radius: 20px;
+            padding: 28px 32px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        .contact-modal .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .contact-modal .modal-close:hover {
+            background: #e2e8f0;
+            color: var(--text);
+        }
+        .contact-modal h3 {
+            margin: 0 0 24px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+        }
+        .contact-modal .contact-item {
+            margin-bottom: 24px;
+        }
+        .contact-modal .contact-item:last-child {
+            margin-bottom: 0;
+        }
+        .contact-modal .contact-item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+        .contact-modal .qrcode-placeholder {
+            width: 100%;
+            height: 160px;
+            background: #f8fafc;
+            border: 2px dashed var(--card-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 14px;
         }
 
         /* 永久额度说明 */
@@ -607,58 +721,106 @@
 
         <div class="billing-tabs">
             <div class="tabs-inner" role="tablist" aria-label="计费周期">
-                <button type="button" class="tab-btn" role="tab" aria-selected="false" data-period="forever">永久</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" data-period="forever">长期</button>
                 <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-period="month">月付</button>
                 <button type="button" class="tab-btn" role="tab" aria-selected="false" data-period="year">年付 <span class="save-badge">省 20%</span></button>
+            </div>
+            <button type="button" class="contact-service-btn" id="contactServiceBtn" aria-label="联系客服">
+                <span class="online-dot" aria-hidden="true"></span>
+                <span>添加客服，赠送积分</span>
+            </button>
+        </div>
+
+        <!-- 客服弹窗 -->
+        <div class="contact-modal-overlay" id="contactModalOverlay" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
+            <div class="contact-modal">
+                <button type="button" class="modal-close" id="contactModalClose" aria-label="关闭">×</button>
+                <h3 id="contactModalTitle">添加客服</h3>
+                <div class="contact-item">
+                    <div class="contact-item-title">添加微信客服</div>
+                    <div class="qrcode-placeholder">二维码图片（预留）</div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-item-title">添加QQ客服</div>
+                    <div class="qrcode-placeholder">二维码图片（预留）</div>
+                </div>
             </div>
         </div>
 
         <p class="permanent-note" id="permanentNote" style="display: none;">
-            <strong>额度长期有效，功能全开。</strong> 一次性购买，永不过期，充得越多单价越划算。
+            <strong>积分长期有效，功能全开。</strong> 一次性购买，长期使用，充得越多单价越划算。
         </p>
 
         <div class="permanent-grid" id="permanentGrid">
             <article class="permanent-card">
-                <div class="perm-price">¥15</div>
-                <div class="perm-quota">500 万额度</div>
-                <div class="perm-save perm-save-standard">标准价</div>
+                <div class="perm-price">¥1.9</div>
+                <div class="perm-quota">500 积分</div>
+                <div class="perm-save perm-save-standard">新用户</div>
                 <div class="usage-ref">
-                    <span class="usage-ref-item">约 330 次 Gemini 对话</span>
-                    <span class="usage-ref-item">约 100 篇论文润色</span>
-                    <span class="usage-ref-item">约 250 张 AI 生成图片</span>
+                    <span class="usage-ref-item">约 20 次 Gemini-3-Flash 对话</span>
+                    <span class="usage-ref-item">约 16 次 GPT-5.2-Codex 对话</span>
+                    <span class="usage-ref-item">约 6 次 Claude-Opus-4.5 对话</span>
+                    <span class="usage-ref-item">约 1 次 Nano Banana Pro 图片生成</span>
+                </div>
+                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="perm-cta">立即购买</a>
+            </article>
+            <article class="permanent-card">
+                <div class="perm-price">¥3.9</div>
+                <div class="perm-quota">1000 积分</div>
+                <div class="perm-save">每月一次</div>
+                <div class="usage-ref">
+                    <span class="usage-ref-item">约 41 次 Gemini-3-Flash 对话</span>
+                    <span class="usage-ref-item">约 33 次 GPT-5.2-Codex 对话</span>
+                    <span class="usage-ref-item">约 12 次 Claude-Opus-4.5 对话</span>
+                    <span class="usage-ref-item">约 2 次 Nano Banana Pro 图片生成</span>
+                </div>
+                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="perm-cta">立即购买</a>
+            </article>
+            <article class="permanent-card">
+                <div class="perm-price">¥9.9</div>
+                <div class="perm-quota">2000 积分</div>
+                <div class="perm-save">每月一次</div>
+                <div class="usage-ref">
+                    <span class="usage-ref-item">约 83 次 Gemini-3-Flash 对话</span>
+                    <span class="usage-ref-item">约 66 次 GPT-5.2-Codex 对话</span>
+                    <span class="usage-ref-item">约 24 次 Claude-Opus-4.5 对话</span>
+                    <span class="usage-ref-item">约 4 次 Nano Banana Pro 图片生成</span>
                 </div>
                 <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="perm-cta">立即购买</a>
             </article>
             <article class="permanent-card">
                 <div class="perm-price">¥20</div>
-                <div class="perm-quota">1000 万额度</div>
-                <div class="perm-save">-33%</div>
+                <div class="perm-quota">3000 积分</div>
+                <div class="perm-save">长期可累计</div>
                 <div class="usage-ref">
-                    <span class="usage-ref-item">约 660 次 Gemini 对话</span>
-                    <span class="usage-ref-item">约 200 篇论文润色</span>
-                    <span class="usage-ref-item">约 500 张 AI 生成图片</span>
+                    <span class="usage-ref-item">约 125 次 Gemini-3-Flash 对话</span>
+                    <span class="usage-ref-item">约 100 次 GPT-5.2-Codex 对话</span>
+                    <span class="usage-ref-item">约 37 次 Claude-Opus-4.5 对话</span>
+                    <span class="usage-ref-item">约 6 次 Nano Banana Pro 图片生成</span>
                 </div>
                 <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="perm-cta">立即购买</a>
             </article>
             <article class="permanent-card">
                 <div class="perm-price">¥30</div>
-                <div class="perm-quota">2000 万额度</div>
-                <div class="perm-save">-50%</div>
+                <div class="perm-quota">5000 积分</div>
+                <div class="perm-save">长期可累计</div>
                 <div class="usage-ref">
-                    <span class="usage-ref-item">约 1300 次 Gemini 对话</span>
-                    <span class="usage-ref-item">约 400 篇论文润色</span>
-                    <span class="usage-ref-item">约 1000 张 AI 生成图片</span>
+                    <span class="usage-ref-item">约 200 次 Gemini-3-Flash 对话</span>
+                    <span class="usage-ref-item">约 166 次 GPT-5.2-Codex 对话</span>
+                    <span class="usage-ref-item">约 62 次 Claude-Opus-4.5 对话</span>
+                    <span class="usage-ref-item">约 10 次 Nano Banana Pro 图片生成</span>
                 </div>
                 <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="perm-cta">立即购买</a>
             </article>
             <article class="permanent-card">
-                <div class="perm-price">¥40</div>
-                <div class="perm-quota">3500 万额度</div>
-                <div class="perm-save">-62%</div>
+                <div class="perm-price">¥50</div>
+                <div class="perm-quota">10000 积分</div>
+                <div class="perm-save">长期可累计</div>
                 <div class="usage-ref">
-                    <span class="usage-ref-item">约 2300 次 Gemini 对话</span>
-                    <span class="usage-ref-item">约 700 篇论文润色</span>
-                    <span class="usage-ref-item">约 1750 张 AI 生成图片</span>
+                    <span class="usage-ref-item">约 400 次 Gemini-3-Flash 对话</span>
+                    <span class="usage-ref-item">约 333 次 GPT-5.2-Codex 对话</span>
+                    <span class="usage-ref-item">约 125 次 Claude-Opus-4.5 对话</span>
+                    <span class="usage-ref-item">约 20 次 Nano Banana Pro 图片生成</span>
                 </div>
                 <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="perm-cta">立即购买</a>
             </article>
@@ -673,12 +835,13 @@
                 <p class="card-desc">为轻度使用用户设计，满足日常对话与轻量创作。</p>
                 <div class="card-price">
                     <div class="price-amount"><span class="price-value">¥10</span><span>/月</span></div>
-                    <div class="price-quota">500 万额度</div>
-                    <div class="usage-ref">
-                        <span class="usage-ref-item">约 330 次 Gemini 对话</span>
-                        <span class="usage-ref-item">约 100 篇论文润色</span>
-                        <span class="usage-ref-item">约 250 张 AI 生成图片</span>
-                    </div>
+                    <div class="price-quota">500 积分/月</div>
+                <div class="usage-ref">
+                    <span class="usage-ref-item">约 20 次 Gemini-3-Flash 对话</span>
+                    <span class="usage-ref-item">约 16 次 GPT-5.2-Codex 对话</span>
+                    <span class="usage-ref-item">约 6 次 Claude-Opus-4.5 对话</span>
+                    <span class="usage-ref-item">约 1 次 Nano Banana Pro 图片生成</span>
+                </div>
                 </div>
                 <ul class="card-features">
                     <li><span class="icon check">✓</span> 可访问绝大多数 AI 模型</li>
@@ -698,11 +861,12 @@
                 <p class="card-desc">为专业用户设计，解锁全部能力，效率与体验兼顾。</p>
                 <div class="card-price">
                     <div class="price-amount"><span class="price-value">¥20</span><span>/月</span></div>
-                    <div class="price-quota">1000 万额度</div>
+                    <div class="price-quota">1000 积分/月</div>
                     <div class="usage-ref">
-                        <span class="usage-ref-item">约 660 次 Gemini 对话</span>
-                        <span class="usage-ref-item">约 200 篇论文润色</span>
-                        <span class="usage-ref-item">约 500 张 AI 生成图片</span>
+                        <span class="usage-ref-item">约 41 次 Gemini-3-Flash 对话</span>
+                        <span class="usage-ref-item">约 33 次 GPT-5.2-Codex 对话</span>
+                        <span class="usage-ref-item">约 12 次 Claude-Opus-4.5 对话</span>
+                        <span class="usage-ref-item">约 2 次 Nano Banana Pro 图片生成</span>
                     </div>
                 </div>
                 <ul class="card-features">
@@ -724,10 +888,12 @@
                 <p class="card-desc">为大需求用户设计，额度无上限，功能全开。</p>
                 <div class="card-price">
                     <div class="price-amount"><span class="price-value">¥50</span><span>/月</span></div>
-                    <div class="price-quota">无限制额度</div>
+                    <div class="price-quota">无限制积分</div>
                     <div class="usage-ref">
-                        <span class="usage-ref-item">对话、润色、生图按需使用</span>
-                        <span class="usage-ref-item">无月度上限，适合重度用户</span>
+                        <span class="usage-ref-item">约 83 次 Gemini-3-Flash 对话</span>
+                        <span class="usage-ref-item">约 66 次 GPT-5.2-Codex 对话</span>
+                        <span class="usage-ref-item">约 24 次 Claude-Opus-4.5 对话</span>
+                        <span class="usage-ref-item">约 4 次 Nano Banana Pro 图片生成</span>
                     </div>
                 </div>
                 <ul class="card-features">
@@ -761,10 +927,10 @@
             var subscriptionDisclaimer = document.getElementById('subscriptionDisclaimer');
             // 月付价格
             var monthlyPrices = [10, 20, 50];
-            var monthlyQuotas = ['500 万额度', '1000 万额度', '无限制额度'];
+            var monthlyQuotas = ['500 积分/月', '1000 积分/月', '无限制积分'];
             // 年付价格（省 20%）
             var yearlyPrices = [8, 16, 40];
-            var yearlyQuotas = ['500 万额度/月', '1000 万额度/月', '无限制额度'];
+            var yearlyQuotas = ['500 积分/月', '1000 积分/月', '无限制积分'];
 
             function switchPeriod(period) {
                 var isForever = period === 'forever';
@@ -802,6 +968,23 @@
                     switchPeriod(this.dataset.period);
                 });
             });
+
+            // 联系客服弹窗
+            var contactBtn = document.getElementById('contactServiceBtn');
+            var contactOverlay = document.getElementById('contactModalOverlay');
+            var contactClose = document.getElementById('contactModalClose');
+            if (contactBtn && contactOverlay) {
+                contactBtn.addEventListener('click', function () {
+                    contactOverlay.classList.add('visible');
+                });
+                function closeContactModal() {
+                    contactOverlay.classList.remove('visible');
+                }
+                if (contactClose) contactClose.addEventListener('click', closeContactModal);
+                contactOverlay.addEventListener('click', function (e) {
+                    if (e.target === contactOverlay) closeContactModal();
+                });
+            }
         })();
     </script>
 </body>
