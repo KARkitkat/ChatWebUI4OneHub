@@ -305,6 +305,10 @@ html[data-theme="dark"] .model-pop-item:hover {
 	background: var(--line);
 }
 
+html[data-theme="dark"] .model-pop-loading {
+	color: var(--muted);
+}
+
 html[data-theme="dark"] .model-all-card {
 	background: var(--panel);
 	border-color: var(--line);

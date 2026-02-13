@@ -117,6 +117,13 @@
 	overflow-y: auto;
 }
 
+.model-pop-loading {
+	padding: 16px;
+	text-align: center;
+	font-size: 14px;
+	color: #6b7280;
+}
+
 .model-pop-item {
 	border: 1px solid transparent;
 	background: #f9fafb;

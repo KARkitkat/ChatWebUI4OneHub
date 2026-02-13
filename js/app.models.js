@@ -76,26 +76,43 @@ const MODEL_GROUPS_DEFAULT = [
   },
 ];
 
-const MODEL_GROUPS_DRAW = [
-  {
-    key: "flux",
-    label: "Flux",
-    icon: "logo/flux.png",
-    models: ["flux-2-flash"],
-  },
-  {
-    key: "dreamina",
-    label: "即梦",
-    icon: "logo/dreamina.png",
-    models: ["dreamina-3.1"],
-  },
-  {
-    key: "nano-banana",
-    label: "Nano Banana",
-    icon: "logo/gemini.png",
-    models: ["nano-banana"],
-  },
-];
+// 绘图模型：大分类固定 8 个，模型按 id 前缀自动归类（不写死列表）
+const DRAW_CATEGORY_KEYS = ["flux", "nano-banana", "gpt-image", "stablediffusion", "seedream", "hunyuan", "qwen-image", "luma-photon"];
+const DRAW_CATEGORY_LABELS = {
+  "flux": "Flux",
+  "nano-banana": "Nano Banana",
+  "gpt-image": "GPT-Image",
+  "stablediffusion": "Stablediffusion",
+  "seedream": "Seedream",
+  "hunyuan": "Hunyuan",
+  "qwen-image": "Qwen-Image",
+  "luma-photon": "Luma-Photon"
+};
+const MODEL_GROUPS_DRAW = DRAW_CATEGORY_KEYS.map(function (key) {
+  const label = DRAW_CATEGORY_LABELS[key] || key;
+  const icon = key === "flux" ? "logo/flux.png" : key === "nano-banana" ? "logo/gemini.png" : "logo/more.png";
+  return { key: key, label: label, icon: icon, models: [] };
+});
+
+async function fetchDrawModelsForGroup(group) {
+  if (!group || group.models.length > 0) return;
+  try {
+    const list = await fetchAllModelsOnce();
+    if (!Array.isArray(list)) return;
+    const key = String(group.key || "").toLowerCase();
+    if (!key) return;
+    group.models = list
+      .filter(function (m) {
+        return String(m?.id ?? "").toLowerCase().startsWith(key);
+      })
+      .map(function (m) {
+        return m.id;
+      })
+      .sort(function (a, b) {
+        return String(a).localeCompare(String(b));
+      });
+  } catch (_) {}
+}
 
 // 视频模型：API 调用使用小写，展示可用大写；特殊展示名（如带括号）在此映射
 const VIDEO_MODEL_DISPLAY_NAMES = {
@@ -117,20 +134,32 @@ function toVideoModelDisplayName(modelId) {
   }).join("-");
 }
 
-// 视频模型：与产品列表一致，API 小写
-const MODEL_GROUPS_VIDEO = [
-  { key: "veo", label: "Veo", icon: "logo/more.png", models: ["veo-3.1", "veo-3", "veo-3.1-fast", "veo-3-fast", "veo-3-vfast", "veo-2", "veo-2-video", "veo-v3.1", "veo-v3.1-fast"] },
-  { key: "sora", label: "Sora", icon: "logo/more.png", models: ["sora-2-pro", "sora-2", "sora"] },
-  { key: "runway", label: "Runway", icon: "logo/more.png", models: ["runwaygen-4.5", "runway-gen-4-turbo", "runway"] },
-  { key: "kling", label: "Kling", icon: "logo/more.png", models: ["kling-2.6-pro", "kling-2.5-turbo-pro", "kling-omni", "kling-2.5-turbo-std", "kling-2.1-master", "kling-2.1-pro", "kling-2.1-std", "kling-2.0-master", "kling-1.6-pro", "kling-1.5-pro", "kling-pro-effects"] },
-  { key: "wan", label: "Wan", icon: "logo/more.png", models: ["wan-2.6", "wan-2.5", "wan-2.1", "wan-animate", "wan-2.2"] },
-  { key: "hailuo", label: "Hailuo", icon: "logo/more.png", models: ["hailuo-director-01", "hailuo-02", "hailuo-02-standard", "hailuo-02-pro", "hailuo-live", "hailuo-ai"] },
-  { key: "pixverse", label: "Pixverse", icon: "logo/more.png", models: ["pixverse-v5", "pixverse-v4.5"] },
-  { key: "seedance", label: "Seedance", icon: "logo/more.png", models: ["seedance-1.0-pro", "seedance-1.0-lite", "seedance-1.0-fast"] },
-  { key: "ltx", label: "LTX", icon: "logo/more.png", models: ["ltx-2-fast", "ltx-2-pro", "ltx-2-audio"] },
-  { key: "vidu", label: "Vidu", icon: "logo/more.png", models: ["vidu", "vidu-q1"] },
-  { key: "other", label: "其他", icon: "logo/more.png", models: ["grok-imagine-video", "hunyuan-video-1.5", "svi-2.0-pro", "amazon-nova-reel-1.1", "kling-avatar-pro", "omnihuman", "ray2", "mochi-preview"] },
-];
+// 视频模型：大分类固定 10 个，模型按 id 前缀自动归类（不写死列表）
+const VIDEO_CATEGORY_KEYS = ["veo", "sora", "runway", "kling", "wan", "hailuo", "pixverse", "seedance", "ltx", "vidu"];
+const MODEL_GROUPS_VIDEO = VIDEO_CATEGORY_KEYS.map(function (key) {
+  const label = key === "ltx" ? "LTX" : key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+  return { key: key, label: label, icon: "logo/more.png", models: [] };
+});
+
+async function fetchVideoModelsForGroup(group) {
+  if (!group || group.models.length > 0) return;
+  try {
+    const list = await fetchAllModelsOnce();
+    if (!Array.isArray(list)) return;
+    const key = String(group.key || "").toLowerCase();
+    if (!key) return;
+    group.models = list
+      .filter(function (m) {
+        return String(m?.id ?? "").toLowerCase().startsWith(key);
+      })
+      .map(function (m) {
+        return m.id;
+      })
+      .sort(function (a, b) {
+        return String(a).localeCompare(String(b));
+      });
+  } catch (_) {}
+}
 
 // 音频模型：API 小写，展示可大写
 function toAudioModelDisplayName(modelId) {
@@ -140,15 +169,32 @@ function toAudioModelDisplayName(modelId) {
   }).join("-");
 }
 
-// 音频模型：与产品列表一致，API 小写（如 ElevenLabs-V3 -> elevenlabs-v3）
-const MODEL_GROUPS_AUDIO = [
-  { key: "elevenlabs", label: "ElevenLabs", icon: "logo/more.png", models: ["elevenlabs-music", "elevenlabs-v3", "elevenlabs-v2.5-turbo"] },
-  { key: "google", label: "Google", icon: "logo/more.png", models: ["gemini-2.5-pro-tts", "gemini-2.5-flash-tts", "lyria"] },
-  { key: "hailuo", label: "Hailuo", icon: "logo/more.png", models: ["hailuo-speech-02", "hailuo-music-v1.5"] },
-  { key: "sonic", label: "Sonic", icon: "logo/more.png", models: ["sonic-3.0", "sonic-2.0"] },
-  { key: "stable-audio", label: "Stable-Audio", icon: "logo/more.png", models: ["stable-audio-2.5", "stable-audio-2.0"] },
-  { key: "other", label: "其他", icon: "logo/more.png", models: ["unreal-speech-tts", "orpheus-tts", "whisper-v3-large-t", "mmaudio-v2"] },
-];
+// 音频模型：大分类固定 5 个，模型按 id 前缀自动归类（不写死列表），无「其他」
+const AUDIO_CATEGORY_KEYS = ["elevenlabs", "gemini-2.5", "hailuo", "sonic", "stable-audio"];
+const MODEL_GROUPS_AUDIO = AUDIO_CATEGORY_KEYS.map(function (key) {
+  const label = key === "stable-audio" ? "Stable-Audio" : key === "gemini-2.5" ? "Gemini-2.5" : key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+  return { key: key, label: label, icon: "logo/more.png", models: [] };
+});
+
+async function fetchAudioModelsForGroup(group) {
+  if (!group || group.models.length > 0) return;
+  try {
+    const list = await fetchAllModelsOnce();
+    if (!Array.isArray(list)) return;
+    const key = String(group.key || "").toLowerCase();
+    if (!key) return;
+    group.models = list
+      .filter(function (m) {
+        return String(m?.id ?? "").toLowerCase().startsWith(key);
+      })
+      .map(function (m) {
+        return m.id;
+      })
+      .sort(function (a, b) {
+        return String(a).localeCompare(String(b));
+      });
+  } catch (_) {}
+}
 
 const ALL_MODELS_PILL = {
   key: "all",
@@ -257,8 +303,15 @@ function findGroupByPrefix(prefix) {
 function findGroupByModel(modelId) {
   const target = normalizeToken(modelId);
   if (!target) return null;
+  const groups = getPillbarModelGroups();
+  if (isVideoQuickModelMode() || isDrawQuickModelMode() || isAudioQuickModelMode()) {
+    const idLower = String(modelId ?? "").toLowerCase();
+    return groups.find(function (g) {
+      return idLower.startsWith(g.key);
+    }) || null;
+  }
   return (
-    getPillbarModelGroups().find((group) =>
+    groups.find((group) =>
       group.models.some((m) => normalizeToken(m) === target)
     ) || null
   );
@@ -392,6 +445,21 @@ function openModelPop(group, anchorEl) {
   ensureModelPop();
   modelPopGroup = group;
   modelPopAnchor = anchorEl || pillbarEl;
+  if ((isVideoQuickModelMode() || isDrawQuickModelMode() || isAudioQuickModelMode()) && (!group.models || group.models.length === 0)) {
+    modelPopList.innerHTML = '<div class="model-pop-loading">加载中...</div>';
+    modelPopEl?.classList.add("show");
+    modelPopEl?.setAttribute("aria-hidden", "false");
+    setActivePill(group.key);
+    positionModelPop(modelPopAnchor);
+    var fetchFn = isVideoQuickModelMode() ? fetchVideoModelsForGroup : isDrawQuickModelMode() ? fetchDrawModelsForGroup : fetchAudioModelsForGroup;
+    fetchFn(group).then(function () {
+      if (modelPopGroup === group && modelPopList) {
+        modelPopList.innerHTML = "";
+        renderModelPopList(group);
+      }
+    });
+    return;
+  }
   renderModelPopList(group);
   modelPopEl?.classList.add("show");
   modelPopEl?.setAttribute("aria-hidden", "false");

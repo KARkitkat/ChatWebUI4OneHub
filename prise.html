@@ -79,6 +79,19 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .top-nav .nav-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .top-nav .nav-logo img {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
 
         /* 标题区 */
         .pricing-header {
@@ -307,6 +320,12 @@
             text-align: center;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
             transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .permanent-card .usage-ref {
+            flex: 1;
+            min-height: 0;
         }
 
         .permanent-card:hover {
@@ -348,7 +367,7 @@
 
         .permanent-card .perm-cta {
             display: block;
-            margin-top: 14px;
+            margin-top: auto;
             padding: 10px 16px;
             border-radius: 12px;
             font-size: 14px;
@@ -406,6 +425,10 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
+        }
+        .pricing-card .card-features {
+            flex: 1;
+            min-height: 0;
         }
 
         .pricing-card:hover {
@@ -577,6 +600,11 @@
             color: var(--muted);
             margin-top: 4px;
         }
+        .price-period-note {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
 
         /* 额度参考（可做多少事） */
         .usage-ref {
@@ -711,7 +739,10 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 返回首页
             </a>
-            <span class="brand-mini">TOPglobai</span>
+            <a href="home3.html" class="nav-logo" aria-label="TOPglobai 首页">
+                <img src="https://img.topglobai.com/logomain2.png" alt="TOPglobai">
+                <span class="brand-mini">TOPglobai</span>
+            </a>
         </nav>
 
         <header class="pricing-header">
@@ -721,7 +752,7 @@
 
         <div class="billing-tabs">
             <div class="tabs-inner" role="tablist" aria-label="计费周期">
-                <button type="button" class="tab-btn" role="tab" aria-selected="false" data-period="forever">长期</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" data-period="forever">加油包</button>
                 <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-period="month">月付</button>
                 <button type="button" class="tab-btn" role="tab" aria-selected="false" data-period="year">年付 <span class="save-badge">省 20%</span></button>
             </div>
@@ -748,50 +779,14 @@
         </div>
 
         <p class="permanent-note" id="permanentNote" style="display: none;">
-            <strong>积分长期有效，功能全开。</strong> 一次性购买，长期使用，充得越多单价越划算。
+            <strong>有效期说明：</strong>当你购买的<strong>月付包不够用</strong>时，可以购买<strong>加油包</strong>。购买加油包后，您当前所有的剩余积分（含基础包）将<strong>统一延期至加油包失效日（即购买之日起一个月）</strong>。例如：若您的基础包剩余 50 积分且原本将于 10 月 1 日过期，当您在 9 月 15 日购买加油包后，这 50 积分将与新积分一起「<strong>延期</strong>」，<strong>有效期统一延长至 10 月 15 日</strong>。
         </p>
 
         <div class="permanent-grid" id="permanentGrid">
             <article class="permanent-card">
-                <div class="perm-price">¥1.9</div>
-                <div class="perm-quota">500 积分</div>
-                <div class="perm-save perm-save-standard">新用户</div>
-                <div class="usage-ref">
-                    <span class="usage-ref-item">约 20 次 Gemini-3-Flash 对话</span>
-                    <span class="usage-ref-item">约 16 次 GPT-5.2-Codex 对话</span>
-                    <span class="usage-ref-item">约 6 次 Claude-Opus-4.5 对话</span>
-                    <span class="usage-ref-item">约 1 次 Nano Banana Pro 图片生成</span>
-                </div>
-                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="perm-cta">立即购买</a>
-            </article>
-            <article class="permanent-card">
-                <div class="perm-price">¥3.9</div>
-                <div class="perm-quota">1000 积分</div>
-                <div class="perm-save">每月一次</div>
-                <div class="usage-ref">
-                    <span class="usage-ref-item">约 41 次 Gemini-3-Flash 对话</span>
-                    <span class="usage-ref-item">约 33 次 GPT-5.2-Codex 对话</span>
-                    <span class="usage-ref-item">约 12 次 Claude-Opus-4.5 对话</span>
-                    <span class="usage-ref-item">约 2 次 Nano Banana Pro 图片生成</span>
-                </div>
-                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="perm-cta">立即购买</a>
-            </article>
-            <article class="permanent-card">
-                <div class="perm-price">¥9.9</div>
-                <div class="perm-quota">2000 积分</div>
-                <div class="perm-save">每月一次</div>
-                <div class="usage-ref">
-                    <span class="usage-ref-item">约 83 次 Gemini-3-Flash 对话</span>
-                    <span class="usage-ref-item">约 66 次 GPT-5.2-Codex 对话</span>
-                    <span class="usage-ref-item">约 24 次 Claude-Opus-4.5 对话</span>
-                    <span class="usage-ref-item">约 4 次 Nano Banana Pro 图片生成</span>
-                </div>
-                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="perm-cta">立即购买</a>
-            </article>
-            <article class="permanent-card">
                 <div class="perm-price">¥20</div>
                 <div class="perm-quota">3000 积分</div>
-                <div class="perm-save">长期可累计</div>
+                <div class="perm-save">有效期一个月</div>
                 <div class="usage-ref">
                     <span class="usage-ref-item">约 125 次 Gemini-3-Flash 对话</span>
                     <span class="usage-ref-item">约 100 次 GPT-5.2-Codex 对话</span>
@@ -803,7 +798,7 @@
             <article class="permanent-card">
                 <div class="perm-price">¥30</div>
                 <div class="perm-quota">5000 积分</div>
-                <div class="perm-save">长期可累计</div>
+                <div class="perm-save">有效期一个月</div>
                 <div class="usage-ref">
                     <span class="usage-ref-item">约 200 次 Gemini-3-Flash 对话</span>
                     <span class="usage-ref-item">约 166 次 GPT-5.2-Codex 对话</span>
@@ -815,7 +810,7 @@
             <article class="permanent-card">
                 <div class="perm-price">¥50</div>
                 <div class="perm-quota">10000 积分</div>
-                <div class="perm-save">长期可累计</div>
+                <div class="perm-save">有效期一个月</div>
                 <div class="usage-ref">
                     <span class="usage-ref-item">约 400 次 Gemini-3-Flash 对话</span>
                     <span class="usage-ref-item">约 333 次 GPT-5.2-Codex 对话</span>
@@ -827,15 +822,22 @@
         </div>
         <p class="usage-disclaimer" id="permanentDisclaimer" style="display: none;">上述对话次数、论文篇数、图片张数等均为参考值，实际消耗因模型与用法不同会有差异。</p>
 
+        <p class="permanent-note subscription-note" id="monthNote" style="display: none;">
+            月付说明：每月仅限充值一次。
+        </p>
+        <p class="permanent-note subscription-note" id="yearNote" style="display: none;">
+            年付说明：每年仅限充值一次。
+        </p>
         <div class="subscription-content visible" id="subscriptionContent">
         <div class="pricing-grid">
-            <!-- 轻度使用 -->
+            <!-- 新人体验 -->
             <article class="pricing-card">
-                <h2 class="card-name">轻度使用</h2>
-                <p class="card-desc">为轻度使用用户设计，满足日常对话与轻量创作。</p>
+                <h2 class="card-name">新人体验</h2>
+                <p class="card-desc">新用户专享低价尝鲜，体验主流 AI 对话与轻量使用。仅限一次。</p>
                 <div class="card-price">
-                    <div class="price-amount"><span class="price-value">¥10</span><span>/月</span></div>
+                    <div class="price-amount"><span class="price-value">¥1.9</span><span>/月</span></div>
                     <div class="price-quota">500 积分/月</div>
+                    <div class="price-period-note" style="display: none;"></div>
                 <div class="usage-ref">
                     <span class="usage-ref-item">约 20 次 Gemini-3-Flash 对话</span>
                     <span class="usage-ref-item">约 16 次 GPT-5.2-Codex 对话</span>
@@ -847,21 +849,22 @@
                     <li><span class="icon check">✓</span> 可访问绝大多数 AI 模型</li>
                     <li><span class="icon check">✓</span> DeepSeek R1</li>
                     <li><span class="icon check">✓</span> Gemini 3.5 等主流模型</li>
-                    <li><span class="icon cross">×</span> 生成图片</li>
-                    <li><span class="icon cross">×</span> AI 翻译</li>
-                    <li><span class="icon cross">×</span> AI 润色</li>
+                    <li><span class="icon check">✓</span> 生成图片</li>
+                    <li><span class="icon check">✓</span> AI 翻译</li>
+                    <li><span class="icon check">✓</span> AI 润色</li>
                 </ul>
-                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="card-cta">选择轻度版</a>
+                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="card-cta">选择新人体验</a>
             </article>
 
-            <!-- 专业使用（推荐） -->
+            <!-- 轻度使用（推荐） -->
             <article class="pricing-card featured">
                 <span class="card-badge">推荐</span>
-                <h2 class="card-name">专业使用</h2>
-                <p class="card-desc">为专业用户设计，解锁全部能力，效率与体验兼顾。</p>
+                <h2 class="card-name">轻度使用</h2>
+                <p class="card-desc">为轻度使用用户设计，满足日常对话与轻量创作。</p>
                 <div class="card-price">
-                    <div class="price-amount"><span class="price-value">¥20</span><span>/月</span></div>
+                    <div class="price-amount"><span class="price-value">¥3.9</span><span>/月</span></div>
                     <div class="price-quota">1000 积分/月</div>
+                    <div class="price-period-note" style="display: none;"></div>
                     <div class="usage-ref">
                         <span class="usage-ref-item">约 41 次 Gemini-3-Flash 对话</span>
                         <span class="usage-ref-item">约 33 次 GPT-5.2-Codex 对话</span>
@@ -870,25 +873,25 @@
                     </div>
                 </div>
                 <ul class="card-features">
-                    <li><span class="icon check">✓</span> 可访问所有 AI 模型</li>
+                    <li><span class="icon check">✓</span> 可访问绝大多数 AI 模型</li>
                     <li><span class="icon check">✓</span> DeepSeek R1</li>
-                    <li><span class="icon check">✓</span> Gemini 3.5 等全系列</li>
+                    <li><span class="icon check">✓</span> Gemini 3.5 等主流模型</li>
                     <li><span class="icon check">✓</span> 生成图片</li>
                     <li><span class="icon check">✓</span> AI 翻译</li>
                     <li><span class="icon check">✓</span> AI 润色</li>
-                    <li><span class="icon check">✓</span> 更多高级能力</li>
                 </ul>
-                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="card-cta">选择专业版 →</a>
+                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="card-cta">选择轻度版 →</a>
             </article>
 
-            <!-- 无限制使用 Ultra -->
+            <!-- 专业使用 Ultra -->
             <article class="pricing-card ultra">
                 <span class="card-badge ultra-badge">ULTRA</span>
-                <h2 class="card-name">无限制使用</h2>
-                <p class="card-desc">为大需求用户设计，额度无上限，功能全开。</p>
+                <h2 class="card-name">专业使用</h2>
+                <p class="card-desc">为专业用户设计，解锁全部能力，效率与体验兼顾。</p>
                 <div class="card-price">
-                    <div class="price-amount"><span class="price-value">¥50</span><span>/月</span></div>
-                    <div class="price-quota">无限制积分</div>
+                    <div class="price-amount"><span class="price-value">¥9.9</span><span>/月</span></div>
+                    <div class="price-quota">2000 积分/月</div>
+                    <div class="price-period-note" style="display: none;"></div>
                     <div class="usage-ref">
                         <span class="usage-ref-item">约 83 次 Gemini-3-Flash 对话</span>
                         <span class="usage-ref-item">约 66 次 GPT-5.2-Codex 对话</span>
@@ -903,9 +906,9 @@
                     <li><span class="icon check">✓</span> 生成图片</li>
                     <li><span class="icon check">✓</span> AI 翻译</li>
                     <li><span class="icon check">✓</span> AI 润色</li>
-                    <li><span class="icon check">✓</span> 全部高级能力</li>
+                    <li><span class="icon check">✓</span> 更多高级能力</li>
                 </ul>
-                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="card-cta">选择无限制版</a>
+                <a href="https://topglobai.com/panel/topup" target="_blank" rel="noopener" class="card-cta">选择专业版</a>
             </article>
         </div>
         <p class="usage-disclaimer" id="subscriptionDisclaimer">上述对话次数、论文篇数、图片张数等均为参考值，实际消耗因模型与用法不同会有差异。</p>
@@ -925,12 +928,14 @@
             var permanentDisclaimer = document.getElementById('permanentDisclaimer');
             var subscriptionContent = document.getElementById('subscriptionContent');
             var subscriptionDisclaimer = document.getElementById('subscriptionDisclaimer');
+            var monthNote = document.getElementById('monthNote');
+            var yearNote = document.getElementById('yearNote');
             // 月付价格
-            var monthlyPrices = [10, 20, 50];
-            var monthlyQuotas = ['500 积分/月', '1000 积分/月', '无限制积分'];
+            var monthlyPrices = [1.9, 3.9, 9.9];
+            var monthlyQuotas = ['500 积分/月', '1000 积分/月', '2000 积分/月'];
             // 年付价格（省 20%）
-            var yearlyPrices = [8, 16, 40];
-            var yearlyQuotas = ['500 积分/月', '1000 积分/月', '无限制积分'];
+            var yearlyPrices = [1.52, 3.12, 7.92];
+            var yearlyQuotas = ['500 积分/月', '1000 积分/月', '2000 积分/月'];
 
             function switchPeriod(period) {
                 var isForever = period === 'forever';
@@ -948,17 +953,29 @@
                 if (subscriptionContent) subscriptionContent.classList.toggle('visible', !isForever);
                 if (subscriptionDisclaimer) subscriptionDisclaimer.style.display = isForever ? 'none' : 'block';
 
+                if (monthNote) monthNote.style.display = (period === 'month') ? 'block' : 'none';
+                if (yearNote) yearNote.style.display = (period === 'year') ? 'block' : 'none';
                 if (!isForever) {
                     var prices = isYear ? yearlyPrices : monthlyPrices;
                     var quotas = isYear ? yearlyQuotas : monthlyQuotas;
-                    var suffix = isYear ? '/年' : '/月';
+                    var suffix = isYear ? '/月' : '/月';
                     cards.forEach(function (card, i) {
                         var val = card.querySelector('.price-value');
                         var suf = card.querySelector('.price-amount span:last-child');
                         var quota = card.querySelector('.price-quota');
+                        var periodNote = card.querySelector('.price-period-note');
                         if (val) val.textContent = '¥' + prices[i];
                         if (suf) suf.textContent = suffix;
                         if (quota) quota.textContent = quotas[i];
+                        if (periodNote) {
+                            if (isYear) {
+                                var yearTotal = (prices[i] * 12).toFixed(2);
+                                periodNote.textContent = '一年' + yearTotal + '元';
+                            } else {
+                                periodNote.textContent = '';
+                            }
+                            periodNote.style.display = isYear ? 'block' : 'none';
+                        }
                     });
                 }
             }
@@ -968,6 +985,7 @@
                     switchPeriod(this.dataset.period);
                 });
             });
+            switchPeriod(document.querySelector('.tab-btn.active').dataset.period);
 
             // 联系客服弹窗
             var contactBtn = document.getElementById('contactServiceBtn');
