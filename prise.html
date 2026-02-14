@@ -164,6 +164,10 @@
             opacity: 0.9;
         }
 
+        .tab-btn[data-period="forever"].hidden {
+            display: none;
+        }
+
         /* 联系客服按钮 */
         .contact-service-btn {
             display: inline-flex;
@@ -930,6 +934,17 @@
             var subscriptionDisclaimer = document.getElementById('subscriptionDisclaimer');
             var monthNote = document.getElementById('monthNote');
             var yearNote = document.getElementById('yearNote');
+
+            // 默认隐藏「加油包」；用户点击过任意基础包「选择xx包」后，下次加载则显示
+            var foreverTab = document.querySelector('.tab-btn[data-period="forever"]');
+            if (foreverTab && localStorage.getItem('priseShowForeverTab') !== '1') {
+                foreverTab.classList.add('hidden');
+            }
+            subscriptionContent && subscriptionContent.addEventListener('click', function (e) {
+                if (e.target.closest && e.target.closest('a.card-cta')) {
+                    try { localStorage.setItem('priseShowForeverTab', '1'); } catch (_) {}
+                }
+            });
             // 月付价格
             var monthlyPrices = [1.9, 3.9, 9.9];
             var monthlyQuotas = ['500 积分/月', '1000 积分/月', '2000 积分/月'];

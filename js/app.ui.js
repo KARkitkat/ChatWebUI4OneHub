@@ -695,6 +695,17 @@ sidebarMask?.addEventListener("click", () => {
   setSidebarOpen(false);
 });
 
+// 侧边栏教程提示框：关闭后记住状态
+const sidePromo = document.getElementById("sidePromo");
+const sidePromoClose = document.getElementById("sidePromoClose");
+if (sidePromo && localStorage.getItem("sidePromoClosed") === "1") {
+  sidePromo.classList.add("hidden");
+}
+sidePromoClose?.addEventListener("click", () => {
+  sidePromo?.classList.add("hidden");
+  try { localStorage.setItem("sidePromoClosed", "1"); } catch (_) {}
+});
+
 smallScreenQuery.addEventListener("change", (e) => {
   if (!e.matches) {
     setSidebarOpen(false);

@@ -85,6 +85,53 @@
 	padding: 0 6px;
 }
 
+/* 侧边栏提示框（创作音频下方） */
+.side-promo {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+	padding: 8px 10px;
+	margin-top: 4px;
+	background: var(--brand);
+	border-radius: 10px;
+	position: relative;
+}
+.side-promo.hidden {
+	display: none;
+}
+.side-promo-text {
+	flex: 1;
+	min-width: 0;
+	font-size: 11px;
+	line-height: 1.4;
+	color: #fff;
+	text-decoration: none;
+}
+.side-promo-text:hover {
+	text-decoration: underline;
+	color: #fff;
+}
+.side-promo-close {
+	flex-shrink: 0;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: none;
+	background: rgba(255,255,255,0.25);
+	color: #fff;
+	font-size: 16px;
+	line-height: 1;
+	border-radius: 6px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	transition: background var(--duration);
+}
+.side-promo-close:hover {
+	background: rgba(255,255,255,0.4);
+}
+
 .side-title {
 	font-size: 12px;
 	color: var(--muted2);
