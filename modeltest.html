@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>模型测试 - 对话 / 文件上传 / Video API - TOPglobai</title>
+    <style>
+        :root {
+            --primary: #4facfe;
+            --primary-end: #00f2fe;
+            --pill-active: linear-gradient(135deg, #0ea5e9, #2563eb);
+            --bg-color: #ffffff;
+            --card-border: rgba(79, 172, 254, 0.25);
+            --text: #111827;
+            --muted: #6b7280;
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --disabled: #9ca3af;
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100%;
+            color: var(--text);
+        }
+
+        .bg-decoration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 200vw;
+            height: 200vh;
+            transform: translate(-50%, -50%) rotate(-12deg);
+            z-index: 0;
+            background: radial-gradient(ellipse 80% 50% at 50% 50%, rgba(79, 172, 254, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .main-wrapper {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .back-link {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: var(--primary); }
+
+        .brand-mini {
+            font-weight: 700;
+            font-size: 18px;
+            background: linear-gradient(to right, var(--primary), var(--primary-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .nav-logo img {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            font-weight: 800;
+            color: var(--text);
+            margin: 0 0 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 1rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .main-card {
+            background: #fff;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .form-group { margin-bottom: 24px; }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .form-input::placeholder { color: var(--muted); }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .form-hint a { color: var(--primary); }
+
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: var(--pill-active);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+        }
+
+        .btn:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn:active { transform: translateY(0); }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* 对话区域 */
+        .chat-messages {
+            background: #f8fafc;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            min-height: 200px;
+            max-height: 360px;
+            overflow-y: auto;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .chat-msg {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 90%;
+        }
+
+        .chat-msg.user {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.1));
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            margin-left: auto;
+        }
+
+        .chat-msg.assistant {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+        }
+
+        .chat-msg .role {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input-row .form-input {
+            flex: 1;
+            min-height: 48px;
+        }
+
+        /* 文件上传 */
+        .upload-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            background: #f8fafc;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(79, 172, 254, 0.05);
+        }
+
+        .upload-zone input[type="file"] {
+            display: block;
+            margin: 0 auto 12px;
+            font-size: 14px;
+        }
+
+        .upload-result {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .upload-result.success {
+            display: block;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #166534;
+        }
+
+        .upload-result.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: var(--error);
+        }
+
+        .upload-result .label {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .upload-result pre {
+            margin: 8px 0 0;
+            padding: 12px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        /* Video API */
+        .video-api-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .video-api-row .form-input { flex: 1; min-width: 120px; }
+
+        .state-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .state-badge.waiting {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .state-badge.success {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .state-badge.fail {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .task-result-box {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .task-result-box .row { margin-bottom: 8px; }
+        .task-result-box .row:last-child { margin-bottom: 0; }
+        .task-result-box .key { color: var(--muted); margin-right: 8px; }
+
+        .result-urls {
+            margin-top: 12px;
+        }
+
+        .result-urls video {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 8px;
+            background: #000;
+        }
+
+        .result-urls a {
+            color: var(--primary);
+            word-break: break-all;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .radio-group label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .usage-steps {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .usage-steps strong { color: var(--text); }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #f3f4f6;
+            color: var(--muted);
+        }
+
+        .status-indicator.loading {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .loading-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 600px) {
+            .main-wrapper { padding: 24px 16px 40px; }
+            .main-card { padding: 24px; }
+            .chat-input-row { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration"></div>
+
+    <div class="main-wrapper">
+        <nav class="top-nav">
+            <a href="apitest.html" class="back-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                返回 API 测试
+            </a>
+            <a href="https://topglobai.com/" class="nav-logo" aria-label="TOPglobai 首页">
+                <img src="https://img.topglobai.com/logomain2.png" alt="TOPglobai">
+                <span class="brand-mini">TOPglobai</span>
+            </a>
+        </nav>
+
+        <header class="header">
+            <h1 class="title">模型测试</h1>
+            <p class="subtitle">配置 API 后进行对话、文件上传与 Video 生成任务测试</p>
+        </header>
+
+        <div class="main-card">
+            <div class="form-group">
+                <label for="apiBase" class="form-label">API 地址</label>
+                <input type="url" id="apiBase" class="form-input" placeholder="https://api.kie.ai">
+                <p class="form-hint">例如：https://api.kie.ai（不要以 / 结尾）</p>
+            </div>
+            <div class="form-group">
+                <label for="apiKey" class="form-label">API Key</label>
+                <input type="password" id="apiKey" class="form-input" placeholder="YOUR_API_KEY">
+                <p class="form-hint">获取 Key 请前往 <a href="https://kie.ai/api-key" target="_blank" rel="noopener">API Key 管理</a>，请求头需带 <code>Authorization: Bearer YOUR_API_KEY</code></p>
+            </div>
+        </div>
+
+        <div class="main-card">
+            <h2 class="section-title">简单对话</h2>
+            <div class="form-group">
+                <label for="chatModel" class="form-label">模型</label>
+                <input type="text" id="chatModel" class="form-input" placeholder="gpt-3.5-turbo" value="gpt-3.5-turbo">
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div style="color: var(--muted); font-size: 14px; text-align: center; padding: 24px;">暂无消息，在下方输入内容发送</div>
+            </div>
+            <div class="chat-input-row">
+                <input type="text" id="chatInput" class="form-input" placeholder="输入消息后回车或点击发送">
+                <button type="button" class="btn" id="sendChatBtn">发送</button>
+            </div>
+        </div>
+
+        <div class="main-card">
+            <h2 class="section-title">上传文件</h2>
+            <p class="form-hint" style="margin-bottom: 12px;">调用 <code>/api/v1/files/upload</code>，上传后返回 fileId 与 url。</p>
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="fileInput" accept="*">
+                <p style="color: var(--muted); font-size: 14px; margin: 0;">选择文件或拖拽到此处</p>
+            </div>
+            <button type="button" class="btn" id="uploadBtn" disabled>上传</button>
+            <div class="upload-result" id="uploadResult"></div>
+        </div>
+
+        <div class="main-card">
+            <h2 class="section-title">Video 生成 (Jobs API)</h2>
+            <p class="form-hint" style="margin-bottom: 16px;">创建视频生成任务并查询状态。接口：<code>POST /api/v1/jobs/createTask</code>（Content-Type: application/json）、<code>GET /api/v1/jobs/recordInfo?taskId=xxx</code>。认证：请求头 <code>Authorization: Bearer YOUR_API_KEY</code>。</p>
+
+            <div class="usage-steps">
+                <strong>使用步骤：</strong>① 上方填写 API 地址、API Key → ② 在「上传文件」上传图片，点击「填入 Video 多图」得到图片 URL → ③ 下方填写文本描述与 multi_shots → ④ 点击「创建任务」→ ⑤ 用自动填入的 taskId「查询状态」或勾选自动轮询，完成后在结果中查看/播放视频。
+            </div>
+
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--text); margin: 0 0 12px;">1. 创建任务</h3>
+            <p class="form-hint" style="margin-bottom: 12px;">文档参数：<code>model</code>（必填）、<code>input</code>（必填）、<code>callBackUrl</code>（可选）。<code>input</code> 文档仅列 <code>mode</code>；本页增加 <code>multi_shots</code>（实际 API 必填）与可选 <code>prompt</code>。</p>
+            <div class="form-group">
+                <label for="videoModel" class="form-label">model（必填）</label>
+                <input type="text" id="videoModel" class="form-input" value="kling-3.0/video" placeholder="kling-3.0/video">
+                <p class="form-hint">Model name, format: kling-3.0/video，须与文档一致</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">input.mode（必填）</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="videoMode" value="std" checked> std（标准分辨率）</label>
+                    <label><input type="radio" name="videoMode" value="pro"> pro（更高分辨率）</label>
+                </div>
+                <p class="form-hint">Generation mode. std = standard resolution, pro = higher resolution. Default: "std"</p>
+            </div>
+            <div class="form-group">
+                <label for="videoPrompt" class="form-label">input.prompt（可选，文档未列）</label>
+                <textarea id="videoPrompt" class="form-input" rows="2" placeholder="描述你希望生成的视频内容，例如：镜头缓慢推进，人物微笑"></textarea>
+                <p class="form-hint">对生成视频的文字描述，部分模型必填，按实际 API 要求填写</p>
+            </div>
+            <div class="form-group">
+                <label for="multiShots" class="form-label">input.multi_shots（必填，文档未列）</label>
+                <textarea id="multiShots" class="form-input" rows="3" placeholder="每行一个图片 URL&#10;可先在上方「上传文件」获取 url 后粘贴到此"></textarea>
+                <p class="form-hint">多图/多镜头图片 URL 列表，每行一个，不能为空；实际 API 要求必填</p>
+            </div>
+            <div class="form-group">
+                <label for="callBackUrl" class="form-label">callBackUrl（可选）</label>
+                <input type="url" id="callBackUrl" class="form-input" placeholder="https://your-domain.com/api/callback">
+                <p class="form-hint">任务完成时向此 URL 发送 POST，内容同「查询任务」响应；不填则无回调，需轮询 recordInfo</p>
+            </div>
+            <div class="video-api-row" style="margin-bottom: 24px;">
+                <button type="button" class="btn" id="createTaskBtn">创建任务</button>
+                <span id="createTaskStatus" class="status-indicator" style="display: none;"></span>
+            </div>
+            <div class="form-group" id="taskIdGroup" style="display: none;">
+                <label for="taskIdInput" class="form-label">任务 ID（创建成功后自动填入）</label>
+                <input type="text" id="taskIdInput" class="form-input" placeholder="taskId">
+            </div>
+
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--text); margin: 24px 0 12px;">2. 查询任务状态</h3>
+            <p class="form-hint" style="margin-bottom: 12px;">GET /api/v1/jobs/recordInfo，URL 参数：<code>taskId</code>。响应含 state（waiting/success/fail）、resultJson（成功时为 resultUrls 等）、failCode/failMsg（失败时）。</p>
+            <div class="form-group">
+                <div class="video-api-row">
+                    <input type="text" id="taskIdInputQuery" class="form-input" placeholder="输入 taskId 或使用上方创建结果">
+                    <button type="button" class="btn" id="queryTaskBtn">查询状态</button>
+                    <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer;">
+                        <input type="checkbox" id="autoPoll"> 自动轮询（每 3 秒）
+                    </label>
+                </div>
+            </div>
+            <div id="queryResult" class="task-result-box" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const apiBaseInput = document.getElementById('apiBase');
+            const apiKeyInput = document.getElementById('apiKey');
+            const chatModelInput = document.getElementById('chatModel');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const sendChatBtn = document.getElementById('sendChatBtn');
+            const fileInput = document.getElementById('fileInput');
+            const uploadZone = document.getElementById('uploadZone');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadResult = document.getElementById('uploadResult');
+
+            const STORAGE_API = 'modeltest_api';
+            const STORAGE_KEY = 'modeltest_key';
+
+            function loadSaved() {
+                try {
+                    const api = localStorage.getItem(STORAGE_API);
+                    const key = localStorage.getItem(STORAGE_KEY);
+                    if (api) apiBaseInput.value = api;
+                    if (key) apiKeyInput.value = key;
+                } catch (e) { console.warn(e); }
+            }
+
+            function saveConfig() {
+                try {
+                    localStorage.setItem(STORAGE_API, apiBaseInput.value.trim());
+                    localStorage.setItem(STORAGE_KEY, apiKeyInput.value.trim());
+                } catch (e) { console.warn(e); }
+            }
+
+            function getBaseUrl() {
+                return (apiBaseInput.value || '').trim().replace(/\/$/, '');
+            }
+
+            function getKey() {
+                return (apiKeyInput.value || '').trim();
+            }
+
+            function getHttpErrorHint(status, serverMsg) {
+                var hints = {
+                    400: '请求参数错误',
+                    401: '认证失败，请检查 API Key',
+                    402: '账户余额不足',
+                    404: '资源或接口未找到',
+                    422: '参数校验失败',
+                    429: '请求过于频繁，请稍后再试',
+                    500: '服务器内部错误'
+                };
+                var hint = hints[status] || ('HTTP ' + status);
+                return serverMsg ? hint + '：' + serverMsg : hint;
+            }
+
+            // ---------- 对话 ----------
+            let chatHistory = [];
+
+            function appendMessage(role, content) {
+                const wrap = chatMessages.querySelector('div:first-child');
+                if (wrap && wrap.textContent.includes('暂无消息')) {
+                    chatMessages.innerHTML = '';
+                }
+                const div = document.createElement('div');
+                div.className = 'chat-msg ' + role;
+                div.innerHTML = '<div class="role">' + (role === 'user' ? '你' : '助手') + '</div><div>' + escapeHtml(content) + '</div>';
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function escapeHtml(s) {
+                const div = document.createElement('div');
+                div.textContent = s;
+                return div.innerHTML;
+            }
+
+            async function sendChat() {
+                const base = getBaseUrl();
+                const key = getKey();
+                const model = (chatModelInput.value || 'gpt-3.5-turbo').trim();
+                const text = (chatInput.value || '').trim();
+                if (!base || !key) {
+                    alert('请先填写 API 地址和 API Key');
+                    return;
+                }
+                if (!text) return;
+
+                const userMsg = { role: 'user', content: text };
+                chatHistory.push(userMsg);
+                appendMessage('user', text);
+                chatInput.value = '';
+                sendChatBtn.disabled = true;
+                sendChatBtn.textContent = '发送中...';
+
+                const url = base + '/v1/chat/completions';
+                if (!url.startsWith('http')) {
+                    sendChatBtn.disabled = false;
+                    sendChatBtn.textContent = '发送';
+                    alert('API 地址格式错误');
+                    return;
+                }
+
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + key,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: chatHistory,
+                        }),
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        const err = data.error?.message || data.message || 'HTTP ' + res.status;
+                        appendMessage('assistant', '错误: ' + err);
+                        return;
+                    }
+                    const content = data.choices?.[0]?.message?.content || JSON.stringify(data);
+                    chatHistory.push({ role: 'assistant', content: content });
+                    appendMessage('assistant', content);
+                    saveConfig();
+                } catch (e) {
+                    appendMessage('assistant', '请求失败: ' + (e.message || String(e)));
+                } finally {
+                    sendChatBtn.disabled = false;
+                    sendChatBtn.textContent = '发送';
+                }
+            }
+
+            sendChatBtn.addEventListener('click', sendChat);
+            chatInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendChat();
+                }
+            });
+
+            // ---------- 文件上传 ----------
+            function setUploadResult(success, title, body, urlForMultiShots) {
+                uploadResult.className = 'upload-result ' + (success ? 'success' : 'error');
+                var btnHtml = (success && urlForMultiShots) ? '<p style="margin-top:10px;"><button type="button" class="btn btn-secondary btn-sm btn-append-multishots" data-url="' + escapeHtml(urlForMultiShots) + '">填入 Video 多图 (multi_shots)</button></p>' : '';
+                uploadResult.innerHTML = '<div class="label">' + escapeHtml(title) + '</div>' + (body ? '<pre>' + escapeHtml(body) + '</pre>' : '') + btnHtml;
+            }
+
+            uploadResult.addEventListener('click', function (e) {
+                var btn = e.target.closest('.btn-append-multishots');
+                if (!btn) return;
+                var url = btn.getAttribute('data-url');
+                var multiShotsEl = document.getElementById('multiShots');
+                if (url && multiShotsEl) {
+                    var cur = (multiShotsEl.value || '').trim();
+                    multiShotsEl.value = cur ? cur + '\n' + url : url;
+                }
+            });
+
+            fileInput.addEventListener('change', function () {
+                uploadBtn.disabled = !fileInput.files || fileInput.files.length === 0;
+            });
+
+            uploadZone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+            uploadZone.addEventListener('dragleave', function () {
+                uploadZone.classList.remove('dragover');
+            });
+            uploadZone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                const files = e.dataTransfer?.files;
+                if (files && files.length) {
+                    fileInput.files = files;
+                    uploadBtn.disabled = false;
+                }
+            });
+
+            uploadBtn.addEventListener('click', async function () {
+                const base = getBaseUrl();
+                const key = getKey();
+                const file = fileInput.files && fileInput.files[0];
+                if (!base || !key) {
+                    setUploadResult(false, '未配置', '请先填写 API 地址和 API Key');
+                    return;
+                }
+                if (!file) {
+                    setUploadResult(false, '未选择文件', '请先选择要上传的文件');
+                    return;
+                }
+
+                const uploadUrl = base + '/api/v1/files/upload';
+                if (!uploadUrl.startsWith('http')) {
+                    setUploadResult(false, '地址错误', 'API 地址格式不正确');
+                    return;
+                }
+
+                uploadBtn.disabled = true;
+                uploadResult.className = 'upload-result';
+                uploadResult.innerHTML = '<span class="status-indicator loading"><span class="loading-spinner"></span> 上传中...</span>';
+
+                const form = new FormData();
+                form.append('file', file);
+
+                try {
+                    const res = await fetch(uploadUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + key,
+                        },
+                        body: form,
+                    });
+
+                    const data = await res.json().catch(function () {
+                        return { code: res.status, message: res.statusText };
+                    });
+
+                    if (data.code === 200 && data.data) {
+                        var url = data.data.url || '';
+                        setUploadResult(true, '上传成功', 'fileId: ' + (data.data.fileId || '') + '\nurl: ' + url, url);
+                        saveConfig();
+                    } else {
+                        setUploadResult(false, '上传失败', (data.msg || data.message || '未知错误') + (data.code ? ' (code: ' + data.code + ')' : ''));
+                    }
+                } catch (e) {
+                    setUploadResult(false, '请求失败', e.message || String(e));
+                } finally {
+                    uploadBtn.disabled = false;
+                }
+            });
+
+            // ---------- Video API：创建任务与查询状态 ----------
+            const createTaskBtn = document.getElementById('createTaskBtn');
+            const createTaskStatus = document.getElementById('createTaskStatus');
+            const taskIdGroup = document.getElementById('taskIdGroup');
+            const taskIdInput = document.getElementById('taskIdInput');
+            const taskIdInputQuery = document.getElementById('taskIdInputQuery');
+            const queryTaskBtn = document.getElementById('queryTaskBtn');
+            const autoPollCheck = document.getElementById('autoPoll');
+            const queryResult = document.getElementById('queryResult');
+
+            function showCreateStatus(type, text) {
+                createTaskStatus.style.display = 'inline-flex';
+                createTaskStatus.className = 'status-indicator ' + (type === 'loading' ? 'loading' : type === 'success' ? 'success' : 'error');
+                createTaskStatus.innerHTML = type === 'loading' ? '<span class="loading-spinner"></span> ' + text : text;
+            }
+
+            createTaskBtn.addEventListener('click', async function () {
+                const base = getBaseUrl();
+                const key = getKey();
+                const model = (document.getElementById('videoModel').value || 'kling-3.0/video').trim();
+                const mode = document.querySelector('input[name="videoMode"]:checked').value;
+                const callBackUrl = (document.getElementById('callBackUrl').value || '').trim();
+                const multiShotsRaw = (document.getElementById('multiShots').value || '').trim();
+                const multiShots = multiShotsRaw
+                    .split(/[\n,，]+/)
+                    .map(function (s) { return s.trim(); })
+                    .filter(Boolean);
+                const prompt = (document.getElementById('videoPrompt').value || '').trim();
+
+                if (!base || !key) {
+                    alert('请先填写 API 地址和 API Key');
+                    return;
+                }
+                if (!multiShots.length) {
+                    alert('multi_shots 不能为空，请至少填写一个图片 URL（可先在上方「上传文件」获取 url）');
+                    return;
+                }
+
+                const url = base + '/api/v1/jobs/createTask';
+                if (!url.startsWith('http')) {
+                    alert('API 地址格式错误');
+                    return;
+                }
+
+                createTaskBtn.disabled = true;
+                showCreateStatus('loading', '创建中...');
+
+                const input = { mode: mode, multi_shots: multiShots };
+                if (prompt) input.prompt = prompt;
+                const body = { model: model, input: input };
+                if (callBackUrl) body.callBackUrl = callBackUrl;
+
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + key,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(body),
+                    });
+
+                    const data = await res.json().catch(function () {
+                        return { code: res.status, msg: res.statusText };
+                    });
+
+                    const ok = data.code === 200 && data.data && data.data.taskId;
+                    const msg = data.msg || data.message || '';
+
+                    if (ok) {
+                        showCreateStatus('success', '已创建，taskId 已填入下方');
+                        taskIdInput.value = data.data.taskId;
+                        taskIdInputQuery.value = data.data.taskId;
+                        taskIdGroup.style.display = 'block';
+                        saveConfig();
+                    } else {
+                        if (res.status === 200 && msg) {
+                            showCreateStatus('error', msg);
+                        } else {
+                            showCreateStatus('error', getHttpErrorHint(res.status, msg || '创建失败'));
+                        }
+                    }
+                } catch (e) {
+                    showCreateStatus('error', '请求失败: ' + (e.message || String(e)));
+                } finally {
+                    createTaskBtn.disabled = false;
+                }
+            });
+
+            function renderQueryResult(data) {
+                const d = data.data || {};
+                const state = d.state || 'unknown';
+                const stateLabel = { waiting: '等待中', success: '成功', fail: '失败' }[state] || state;
+                let html = '<div class="row"><span class="key">状态</span><span class="state-badge ' + state + '">' + escapeHtml(stateLabel) + '</span></div>';
+                html += '<div class="row"><span class="key">taskId</span>' + escapeHtml(d.taskId || '') + '</div>';
+                html += '<div class="row"><span class="key">model</span>' + escapeHtml(d.model || '') + '</div>';
+                if (d.createTime) html += '<div class="row"><span class="key">createTime</span>' + escapeHtml(String(d.createTime)) + '</div>';
+                if (d.costTime != null) html += '<div class="row"><span class="key">costTime</span>' + escapeHtml(d.costTime + ' ms') + '</div>';
+                if (d.completeTime != null) html += '<div class="row"><span class="key">completeTime</span>' + escapeHtml(String(d.completeTime)) + '</div>';
+                if (d.param) html += '<div class="row"><span class="key">param</span><pre style="margin:4px 0 0; font-size:12px; max-height:80px; overflow:auto;">' + escapeHtml(d.param) + '</pre></div>';
+                if (state === 'fail' && (d.failMsg || d.failCode)) {
+                    html += '<div class="row" style="color: var(--error);"><span class="key">失败</span>' + escapeHtml(d.failMsg || d.failCode || '') + '</div>';
+                }
+                if (state === 'success' && d.resultJson) {
+                    try {
+                        const result = typeof d.resultJson === 'string' ? JSON.parse(d.resultJson) : d.resultJson;
+                        const urls = result.resultUrls || (Array.isArray(result) ? result : []);
+                        if (urls.length) {
+                            html += '<div class="result-urls"><div class="row"><span class="key">结果链接</span></div>';
+                            urls.forEach(function (u) {
+                                const isVideo = /\.(mp4|webm|ogg)$/i.test(u) || (u && u.indexOf('video') !== -1);
+                                if (isVideo) {
+                                    html += '<video src="' + escapeHtml(u) + '" controls preload="metadata" style="max-width:100%; border-radius:8px; margin-top:8px; background:#000;"></video><br>';
+                                }
+                                html += '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener">' + escapeHtml(u) + '</a><br>';
+                            });
+                            html += '</div>';
+                        } else if (result.resultObject) {
+                            html += '<div class="row"><span class="key">resultObject</span><pre style="margin:8px 0 0; font-size:12px;">' + escapeHtml(JSON.stringify(result.resultObject, null, 2)) + '</pre></div>';
+                        }
+                    } catch (e) {
+                        html += '<div class="row"><span class="key">resultJson</span><pre style="margin:8px 0 0; font-size:12px;">' + escapeHtml(d.resultJson) + '</pre></div>';
+                    }
+                }
+                queryResult.innerHTML = html;
+                queryResult.style.display = 'block';
+            }
+
+            let pollTimer = null;
+
+            async function doQueryTask(taskId) {
+                const base = getBaseUrl();
+                const key = getKey();
+                if (!base || !key) {
+                    alert('请先填写 API 地址和 API Key');
+                    return;
+                }
+                if (!taskId) {
+                    alert('请先创建任务或输入 taskId');
+                    return;
+                }
+
+                const url = base + '/api/v1/jobs/recordInfo?taskId=' + encodeURIComponent(taskId);
+                if (!url.startsWith('http')) return;
+
+                try {
+                    const res = await fetch(url, {
+                        method: 'GET',
+                        headers: { 'Authorization': 'Bearer ' + key },
+                    });
+                    const data = await res.json().catch(function () {
+                        return { code: res.status, msg: res.statusText };
+                    });
+                    if (data.code === 200 && data.data) {
+                        renderQueryResult(data);
+                        const state = data.data.state;
+                        if (state === 'success' || state === 'fail') {
+                            if (pollTimer) {
+                                clearInterval(pollTimer);
+                                pollTimer = null;
+                            }
+                            autoPollCheck.checked = false;
+                        }
+                    } else {
+                        var errMsg = getHttpErrorHint(res.status, data.msg || data.message || '查询失败');
+                        queryResult.innerHTML = '<div style="color: var(--error);">' + escapeHtml(errMsg) + '</div>';
+                        queryResult.style.display = 'block';
+                    }
+                } catch (e) {
+                    queryResult.innerHTML = '<div style="color: var(--error);">请求失败: ' + escapeHtml(e.message || String(e)) + '</div>';
+                    queryResult.style.display = 'block';
+                }
+            }
+
+            queryTaskBtn.addEventListener('click', function () {
+                const taskId = (taskIdInputQuery.value || taskIdInput.value || '').trim();
+                doQueryTask(taskId);
+            });
+
+            autoPollCheck.addEventListener('change', function () {
+                if (pollTimer) {
+                    clearInterval(pollTimer);
+                    pollTimer = null;
+                }
+                if (!autoPollCheck.checked) return;
+                const taskId = (taskIdInputQuery.value || taskIdInput.value || '').trim();
+                if (!taskId) {
+                    autoPollCheck.checked = false;
+                    alert('请先输入或创建 taskId');
+                    return;
+                }
+                doQueryTask(taskId);
+                pollTimer = setInterval(function () {
+                    if (!autoPollCheck.checked) {
+                        clearInterval(pollTimer);
+                        pollTimer = null;
+                        return;
+                    }
+                    doQueryTask((taskIdInputQuery.value || taskIdInput.value || '').trim());
+                }, 3000);
+            });
+
+            loadSaved();
+        })();
+    </script>
+</body>
+</html>
