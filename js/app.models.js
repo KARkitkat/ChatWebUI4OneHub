@@ -88,9 +88,20 @@ const DRAW_CATEGORY_LABELS = {
   "qwen-image": "Qwen-Image",
   "luma-photon": "Luma-Photon"
 };
+// 绘图分类与 logo 对应（与 model-all 弹窗中 resolveModelIcon 的 logo/${prefix}.png 命名一致）
+const DRAW_CATEGORY_ICONS = {
+  "flux": "logo/flux.png",
+  "nano-banana": "logo/gemini.png",
+  "gpt-image": "logo/gpt-image.png",
+  "stablediffusion": "logo/stablediffusion.png",
+  "seedream": "logo/seedream.png",
+  "hunyuan": "logo/hunyuan.png",
+  "qwen-image": "logo/qwen-image.png",
+  "luma-photon": "logo/luma-photon.png",
+};
 const MODEL_GROUPS_DRAW = DRAW_CATEGORY_KEYS.map(function (key) {
   const label = DRAW_CATEGORY_LABELS[key] || key;
-  const icon = key === "flux" ? "logo/flux.png" : key === "nano-banana" ? "logo/gemini.png" : "logo/more.png";
+  const icon = DRAW_CATEGORY_ICONS[key] || "logo/" + key + ".png";
   return { key: key, label: label, icon: icon, models: [] };
 });
 
@@ -138,7 +149,7 @@ function toVideoModelDisplayName(modelId) {
 const VIDEO_CATEGORY_KEYS = ["veo", "sora", "runway", "kling", "wan", "hailuo", "pixverse", "seedance", "ltx", "vidu"];
 const MODEL_GROUPS_VIDEO = VIDEO_CATEGORY_KEYS.map(function (key) {
   const label = key === "ltx" ? "LTX" : key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-  return { key: key, label: label, icon: "logo/more.png", models: [] };
+  return { key: key, label: label, icon: "logo/" + key + ".png", models: [] };
 });
 
 async function fetchVideoModelsForGroup(group) {
@@ -171,9 +182,13 @@ function toAudioModelDisplayName(modelId) {
 
 // 音频模型：大分类固定 5 个，模型按 id 前缀自动归类（不写死列表），无「其他」
 const AUDIO_CATEGORY_KEYS = ["elevenlabs", "gemini-2.5", "hailuo", "sonic", "stable-audio"];
+const AUDIO_CATEGORY_ICONS = {
+  "gemini-2.5": "logo/gemini.png",
+};
 const MODEL_GROUPS_AUDIO = AUDIO_CATEGORY_KEYS.map(function (key) {
   const label = key === "stable-audio" ? "Stable-Audio" : key === "gemini-2.5" ? "Gemini-2.5" : key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-  return { key: key, label: label, icon: "logo/more.png", models: [] };
+  const icon = AUDIO_CATEGORY_ICONS[key] || "logo/" + key + ".png";
+  return { key: key, label: label, icon: icon, models: [] };
 });
 
 async function fetchAudioModelsForGroup(group) {
@@ -616,7 +631,7 @@ function initModelPillbar(groups) {
     const isDirectPick = Array.isArray(group.models) && group.models.length === 1;
     pill.innerHTML = `
       <span class="dot">
-        <img src="${group.icon}" width="18" alt="" />
+        <img src="${group.icon}" width="18" alt="" onerror="this.onerror=null;this.src='logo/default.png';" />
       </span>${group.label}
     `;
     pill.addEventListener("pointerenter", (ev) => {
@@ -658,7 +673,7 @@ function initModelPillbar(groups) {
   allPill.setAttribute("role", "button");
   allPill.innerHTML = `
       <span class="dot">
-        <img src="${ALL_MODELS_PILL.icon}" width="18" alt="" />
+        <img src="${ALL_MODELS_PILL.icon}" width="18" alt="" onerror="this.onerror=null;this.src='logo/default.png';" />
       </span>${ALL_MODELS_PILL.label}
     `;
   allPill.addEventListener("click", (ev) => {
