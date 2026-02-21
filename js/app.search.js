@@ -78,7 +78,7 @@
       input: queryText,
     };
 
-    const resp = await fetch("https://api.topglobai.com/v1/responses", {
+    const resp = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         Authorization: "Bearer " + apiToken,

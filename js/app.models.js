@@ -726,7 +726,7 @@ async function fetchAllModelsOnce() {
   if (allModelsLoadingPromise) return allModelsLoadingPromise;
 
   allModelsLoadingPromise = (async () => {
-    const response = await fetch("https://api.topglobai.com/v1/models", {
+    const response = await fetch("https://api.openai.com/v1/models", {
       method: "GET",
       headers: {
         Authorization: "Bearer " + apiToken,

@@ -26,7 +26,7 @@
         overlay.setAttribute("aria-hidden", "false");
       }
       document.getElementById("nestedBtnPanel")?.addEventListener("click", function () {
-        window.top.location.href = "https://topglobai.com/panel";
+        window.top.location.href = "https://yourdomain.com/panel";
       });
       document.getElementById("nestedBtnReopen")?.addEventListener("click", function () {
         window.top.location.href = reopenUrl;
@@ -39,7 +39,7 @@
 // 1. 获取当前 URL 的参数
 const urlParams = new URLSearchParams(window.location.search);
 // 管理员密钥：仅用于进入管理后台，不写入 apiToken，且自动跳转至管理员页
-const ADMIN_KEY = "uptu54XTNatwnxbSAwwz";
+const ADMIN_KEY = "1234567890";
 if (urlParams.has("key")) {
   const tokenValue = urlParams.get("key");
   if (tokenValue === ADMIN_KEY) {
@@ -97,7 +97,7 @@ const smallScreenQuery = window.matchMedia("(max-width: 1210px)");
 if (apiToken) {
   console.log("获取成功:", apiToken);
 } else {
-  window.top.location.replace("https://topglobai.com");
+  window.top.location.replace("https://yourdomain.com");
 }
 
 // Pillbar: mouse wheel horizontal scroll support

@@ -60,7 +60,7 @@ function resolveQuotaErrorMessage(err) {
   }
   const raw = msgText || String(err?.message || "");
   if (raw.includes("上游负载已饱和")) {
-    return "积分不足请到 https://topglobai.com/ 充值使用。";
+    return "积分不足请到 https://yourdomain.com/ 充值使用。";
   }
   return "";
 }
@@ -379,7 +379,7 @@ async function sendChatMessage(userText, userContentOverride, signal) {
     stream: true,
   };
 
-  const resp = await fetch("https://api.topglobai.com/v1/chat/completions", {
+  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: "Bearer " + apiToken,
@@ -418,7 +418,7 @@ async function streamTranslateToElement(modelId, prompt, outputEl, signal) {
     stream: true,
   };
 
-  const resp = await fetch("https://api.topglobai.com/v1/chat/completions", {
+  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: "Bearer " + apiToken,
@@ -569,7 +569,7 @@ async function streamOptimizeToElement(modelId, prompt, outputEl, signal) {
     stream: true,
   };
 
-  const resp = await fetch("https://api.topglobai.com/v1/chat/completions", {
+  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: "Bearer " + apiToken,

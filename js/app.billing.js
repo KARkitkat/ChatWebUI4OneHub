@@ -51,13 +51,13 @@
 
     try {
       const sub = await fetchJson(
-        "https://api.topglobai.com/v1/dashboard/billing/subscription"
+        "https://api.openai.com/v1/dashboard/billing/subscription"
       );
       const total = Number(sub?.system_hard_limit_usd);
 
       const { start, end } = getMonthRange();
       const usageUrl = new URL(
-        "https://api.topglobai.com/v1/dashboard/billing/usage"
+        "https://api.openai.com/v1/dashboard/billing/usage"
       );
       usageUrl.searchParams.set("start_date", start);
       usageUrl.searchParams.set("end_date", end);

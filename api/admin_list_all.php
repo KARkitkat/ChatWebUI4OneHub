@@ -9,7 +9,7 @@ function respond($code, $payload) {
 }
 
 // 管理员密钥（仅后端校验，与前端一致）
-define('ADMIN_KEY', 'uptu54XTNatwnxbSAwwz');
+define('ADMIN_KEY', '1234567890');
 
 $admin_key = $_POST['admin_key'] ?? '';
 

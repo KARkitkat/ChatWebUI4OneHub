@@ -8,7 +8,7 @@ function respond($code, $payload) {
     exit;
 }
 
-define('ADMIN_KEY', 'uptu54XTNatwnxbSAwwz');
+define('ADMIN_KEY', '1234567890');
 
 $admin_key = $_POST['admin_key'] ?? '';
 $mode = $_POST['mode'] ?? '';
